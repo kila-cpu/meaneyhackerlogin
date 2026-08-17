@@ -1,0 +1,12 @@
+{
+  "name": "meaney-haulier-dockets",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Meaney App — Haulier Access (interactive prototype: no-login haulier sign-in straight into agg loads dockets)",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

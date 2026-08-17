@@ -1,0 +1,1298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#E11922">
+<title>Meaney App &mdash; Haulier Access (Prototype)</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%9A%9B</text></svg>">
+<style>
+  :root{
+    --red:#E11922; --red-press:#C1121A; --red-soft:#FDE8E9; --red-deep:#B30F17;
+    --ink:#1C222E; --sub:#5D6674; --faint:#8A92A1;
+    --field:#F4F5F7; --field-line:#DDE1E7; --line:#EAECEF;
+    --app-bg:#F2F4F8; --card:#FFFFFF;
+    --green:#199A5B; --green-soft:#E4F5EA;
+    --amber:#B4690E; --amber-soft:#FDF0DC;
+    --grey-pill:#EDEEF1; --grey-pill-ink:#787F8B;
+    --frame:#0D0F13;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(20,25,40,.05),0 6px 18px -10px rgba(20,25,40,.18);
+
+    --bg-1:#EEF0F4; --bg-2:#D9DDE4;
+    --page-ink:#1E232C; --page-sub:#666E7B;
+    --panel:rgba(255,255,255,.74); --panel-line:rgba(0,0,0,.08);
+    --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","Cascadia Code",Menlo,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg-1:#1A1C21; --bg-2:#0C0D10; --page-ink:#F0F1F4; --page-sub:#9BA2AD;
+      --panel:rgba(255,255,255,.06); --panel-line:rgba(255,255,255,.11);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg-1:#1A1C21; --bg-2:#0C0D10; --page-ink:#F0F1F4; --page-sub:#9BA2AD;
+    --panel:rgba(255,255,255,.06); --panel-line:rgba(255,255,255,.11);
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:var(--ui);background:radial-gradient(1200px 760px at 50% -14%,var(--bg-1),var(--bg-2));
+    min-height:100vh;color:var(--page-ink);-webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;align-items:center;padding:34px 16px 70px;gap:24px;}
+  button{font-family:inherit}
+  :focus-visible{outline:2px solid var(--red);outline-offset:2px;border-radius:6px}
+
+  /* ---------- masthead ---------- */
+  .masthead{text-align:center;max-width:680px}
+  .masthead .eyebrow{font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--red);font-weight:800;margin:0 0 10px}
+  .masthead h1{margin:0;font-size:clamp(28px,5.6vw,44px);font-weight:800;letter-spacing:-.025em;line-height:1}
+  .masthead p{margin:14px auto 0;max-width:52ch;color:var(--page-sub);font-size:15px;line-height:1.55}
+  .quote{margin:16px auto 0;max-width:56ch;font-size:14px;line-height:1.55;color:var(--page-sub);
+    border-left:3px solid var(--red);padding:2px 0 2px 14px;text-align:left;font-style:italic}
+
+  .toolbar{display:flex;gap:9px;flex-wrap:wrap;justify-content:center}
+  .tbtn{border:1px solid var(--panel-line);background:var(--panel);color:var(--page-ink);
+    font-size:12.5px;font-weight:700;padding:8px 13px;border-radius:9px;cursor:pointer}
+  .tbtn[aria-pressed="true"]{background:var(--red);border-color:var(--red);color:#fff}
+
+  .stage{display:flex;gap:38px;align-items:flex-start;justify-content:center;flex-wrap:wrap;width:100%}
+
+  /* the phone mockup is a fixed 392px — shrink it rather than clip it on a real phone */
+  @media (max-width:470px){
+    body{padding:26px 10px 50px}
+    .phone{transform:scale(.84);transform-origin:top center;margin-bottom:-134px}
+    .masthead h1{font-size:30px}
+    .stage{gap:20px}
+  }
+
+  /* ---------- phone ---------- */
+  .phone{position:relative;width:392px;height:812px;flex:0 0 auto;background:var(--frame);
+    border-radius:52px;padding:13px;
+    box-shadow:0 2px 4px rgba(0,0,0,.4),0 44px 90px -24px rgba(0,0,0,.5),inset 0 0 0 2px rgba(255,255,255,.06);}
+  .screen{position:relative;width:100%;height:100%;background:var(--app-bg);border-radius:40px;
+    overflow:hidden;display:flex;flex-direction:column;color:var(--ink)}
+  .statusbar{height:46px;flex:none;background:#000;color:#fff;display:flex;align-items:center;
+    justify-content:space-between;padding:0 26px;font-size:14px;font-weight:600;z-index:40}
+  .statusbar .r{display:flex;gap:6px;align-items:center}
+  .statusbar svg{width:17px;height:17px;display:block}
+  .homebar{height:26px;flex:none;background:#000;display:flex;align-items:center;justify-content:center;z-index:40}
+  .homebar i{display:block;width:120px;height:5px;border-radius:3px;background:#5A5A5E}
+
+  .views{position:relative;flex:1;min-height:0;overflow:hidden}
+  .view{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--app-bg);
+    opacity:0;visibility:hidden;transform:translateX(18px);transition:opacity .26s ease,transform .26s ease}
+  .view.active{opacity:1;visibility:visible;transform:none}
+  @media (prefers-reduced-motion:reduce){.view{transition:none}}
+  .scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .scroll::-webkit-scrollbar{width:0}
+
+  /* ---------- Meaney logo block ---------- */
+  .logo{display:inline-flex;flex-direction:column;line-height:1;background:#fff;padding:10px 12px 11px}
+  .logo .nm{font-weight:900;letter-spacing:-.02em;color:#111;font-size:30px}
+  .logo .st{align-self:stretch;background:var(--red);color:#fff;font-weight:800;text-align:center;
+    padding:3px 0;margin-top:3px;font-size:8.5px;letter-spacing:.26em;
+    clip-path:polygon(3% 0,100% 0,97% 100%,0 100%)}
+  .logo.sm .nm{font-size:19px}
+  .logo.sm .st{font-size:6px;letter-spacing:.2em;padding:2px 0}
+
+  /* ---------- sign in ---------- */
+  .signin{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:0;padding:20px 30px 40px;text-align:center}
+  .signin .logo{margin-bottom:44px;box-shadow:var(--shadow)}
+  .signin h2{margin:0 0 46px;font-size:38px;font-weight:600;color:var(--red);letter-spacing:-.02em}
+  .roles{width:100%;display:flex;flex-direction:column;gap:14px}
+  .role{width:100%;border-radius:12px;padding:17px 14px;font-size:17px;font-weight:700;cursor:pointer;
+    border:2px solid var(--red);transition:.12s}
+  .role.fill{background:var(--red);color:#fff;box-shadow:0 10px 22px -12px rgba(225,25,34,.9)}
+  .role.ghost{background:#fff;color:var(--red)}
+  .role:active{transform:translateY(1px)}
+  .role.new{position:relative}
+  .role.new .tag{position:absolute;top:-9px;right:12px;background:var(--green);color:#fff;font-size:9.5px;
+    font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px}
+  .role .cap{display:block;font-size:11.5px;font-weight:600;color:var(--sub);margin-top:4px;letter-spacing:0}
+
+  /* ---------- app header ---------- */
+  .apphead{flex:none;display:grid;grid-template-columns:56px 1fr 56px;align-items:center;
+    padding:14px 16px 10px;gap:8px}
+  .apphead .logo{justify-self:center}
+  .circ{width:52px;height:52px;border-radius:50%;background:var(--red);border:0;cursor:pointer;
+    color:#fff;display:flex;align-items:center;justify-content:center;transition:.12s;
+    box-shadow:0 8px 18px -9px rgba(225,25,34,.8)}
+  .circ:active{transform:scale(.93)}
+  .circ svg{width:24px;height:24px}
+  .grid4{width:44px;height:44px;justify-self:end;border:0;background:none;cursor:pointer;padding:0;
+    display:grid;grid-template-columns:1fr 1fr;gap:5px}
+  .grid4 i{display:block;background:var(--red);border-radius:4px}
+
+  .topbar{flex:none;display:grid;grid-template-columns:46px 1fr 46px;align-items:center;gap:8px;
+    padding:14px 14px 12px;background:#fff;border-bottom:1px solid var(--line)}
+  .topbar .ttl{text-align:center;font-size:18px;font-weight:700;letter-spacing:-.01em}
+  .rbtn{width:44px;height:44px;border-radius:50%;background:var(--red);color:#fff;border:0;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:.12s}
+  .rbtn:active{transform:scale(.92)}
+  .rbtn svg{width:21px;height:21px}
+  .rbtn.ghost{background:transparent}
+
+  /* ---------- forms ---------- */
+  .body{padding:16px 16px 22px;display:flex;flex-direction:column;gap:0}
+  .lede{margin:0 0 16px;font-size:14px;line-height:1.55;color:var(--sub)}
+  .flabel{font-size:12.5px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;
+    margin:14px 0 6px;display:flex;align-items:center;gap:7px}
+  .flabel .req{color:var(--red);font-size:14px;line-height:1}
+  .control{width:100%;font-family:inherit;font-size:15.5px;color:var(--ink);background:var(--field);
+    border:1px solid var(--field-line);border-radius:11px;padding:14px 13px;appearance:none}
+  select.control{background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235D6674' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 12px center;background-size:19px;padding-right:40px}
+  .control::placeholder{color:var(--faint)}
+  textarea.control{min-height:84px;resize:none}
+  input.reg{font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+  .hint{margin:6px 0 0;font-size:12px;line-height:1.45;color:var(--faint)}
+  .check{display:flex;align-items:flex-start;gap:11px;margin-top:18px;cursor:pointer;font-size:13.5px;
+    line-height:1.45;color:var(--ink)}
+  .check .box{flex:none;width:22px;height:22px;border-radius:6px;border:2px solid var(--field-line);
+    background:#fff;display:grid;place-items:center;color:#fff;transition:.12s}
+  .check .box svg{width:14px;height:14px;opacity:0}
+  .check.on .box{background:var(--red);border-color:var(--red)}
+  .check.on .box svg{opacity:1}
+
+  .formfoot{flex:none;padding:14px 16px 18px;background:#fff;border-top:1px solid var(--line)}
+  .cta{width:100%;border:0;background:var(--red);color:#fff;font-size:16.5px;font-weight:800;padding:16px;
+    border-radius:12px;cursor:pointer;box-shadow:0 10px 22px -12px rgba(225,25,34,.9);transition:.12s}
+  .cta:active{transform:translateY(1px)}
+  .cta:disabled{background:#C9CDD4;color:#fff;box-shadow:none;cursor:not-allowed}
+  .cta.sub{margin-top:9px;background:transparent;color:var(--red-deep);box-shadow:none;font-size:14px;
+    font-weight:700;padding:10px;text-decoration:underline}
+
+  /* ---------- identity strip ---------- */
+  .whostrip{margin:0 16px 12px;background:var(--green-soft);border:1px solid #BFE5CE;border-radius:12px;
+    padding:11px 13px;display:flex;align-items:center;gap:11px}
+  .whostrip .av{flex:none;width:38px;height:38px;border-radius:10px;background:var(--green);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:13px}
+  .whostrip .t{min-width:0;flex:1}
+  .whostrip .t b{display:block;font-size:13.5px;font-weight:800;color:#0F6B3F;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .whostrip .t span{display:block;font-size:11.5px;color:#2A7A54;font-family:var(--mono);margin-top:2px}
+  .whostrip .end{flex:none;border:1px solid #9FD4B7;background:#fff;color:#0F6B3F;font-size:11.5px;
+    font-weight:800;padding:7px 10px;border-radius:8px;cursor:pointer}
+
+  .lockcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px;margin-bottom:4px}
+  .lockcard .lh{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;color:var(--faint);
+    letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+  .lockcard .lh svg{width:13px;height:13px}
+  .lockcard dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:7px 14px;font-size:13.5px}
+  .lockcard dt{color:var(--sub);font-weight:600}
+  .lockcard dd{margin:0;font-weight:700;text-align:right;font-family:var(--mono);font-size:13px}
+
+  /* ---------- filters / loads ---------- */
+  .filterpill{margin:0 16px 14px;align-self:flex-start;background:var(--red);color:#fff;border:0;
+    cursor:pointer;border-radius:999px;padding:12px 22px 12px 18px;display:inline-flex;align-items:center;
+    gap:10px;font-size:15px;font-weight:700;box-shadow:0 8px 18px -10px rgba(225,25,34,.8)}
+  .filterpill svg{width:19px;height:19px}
+  .filterbox{margin:0 16px 14px;background:#fff;border:1px solid var(--line);border-radius:12px;
+    padding:13px;display:none}
+  .filterbox.on{display:block}
+  .filterbox .fr{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .filterbox .flabel{margin-top:8px}
+
+  .loadcard{margin:0 16px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+    overflow:hidden;display:flex;flex-direction:column;min-height:270px}
+  .loadcard .lc-head{padding:18px 18px 14px}
+  .loadcard h3{margin:0;font-size:27px;font-weight:700;letter-spacing:-.02em}
+  .loadcard .lc-head p{margin:5px 0 0;font-size:15px;color:var(--sub)}
+  .lhead{display:grid;grid-template-columns:.8fr 1fr .9fr 1.1fr;gap:6px;padding:12px 16px;
+    font-size:12.5px;font-weight:600;color:var(--sub);border-bottom:1px solid var(--line)}
+  .lrow{display:grid;grid-template-columns:.8fr 1fr .9fr 1.1fr;gap:6px;align-items:center;
+    padding:14px 16px;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer;
+    background:#fff;text-align:left;border-left:0;border-right:0;border-top:0;width:100%;font-family:inherit}
+  .lrow:hover{background:var(--red-soft)}
+  .lrow .dk{font-weight:800;font-family:var(--mono)}
+  .lrow .cu{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lrow .pill{font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:999px;justify-self:start}
+  .pill.done{background:var(--green-soft);color:var(--green)}
+  .pill.draft{background:var(--amber-soft);color:var(--amber)}
+  .empty{flex:1;display:grid;place-items:center;color:var(--sub);font-size:17px;padding:36px 16px}
+
+  .actioncard{margin:16px 16px 0;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:20px;display:flex;justify-content:space-around}
+  .act{background:none;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:9px;
+    color:var(--sub);font-size:13.5px;font-weight:600}
+  .act .circle{width:66px;height:66px;border-radius:50%;background:var(--red);color:#fff;display:grid;
+    place-items:center;box-shadow:0 10px 22px -10px rgba(225,25,34,.8);transition:transform .1s}
+  .act:active .circle{transform:scale(.93)}
+  .act svg{width:29px;height:29px}
+
+  /* ---------- bottom nav ---------- */
+  .bottomnav{flex:none;display:flex;background:#fff;border-top:1px solid var(--line);padding:10px 4px 12px}
+  .navbtn{flex:1;background:none;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;
+    gap:5px;color:var(--sub);font-size:12.5px;font-weight:600;padding:2px 2px}
+  .navbtn svg{width:26px;height:26px}
+  .navbtn.on{color:var(--red);font-weight:800}
+  .navbtn.locked{color:#C4C9D1;cursor:not-allowed}
+  .navbtn.locked .lk{font-size:9px}
+
+  /* ---------- picker ---------- */
+  .picker-body{padding:24px 18px;display:flex;flex-direction:column;gap:22px;align-items:center}
+  .selectcard{width:100%;border:1.5px solid var(--red);border-radius:16px;padding:24px 16px;background:#fff;
+    display:flex;flex-direction:column;align-items:center;gap:20px}
+  .selectcard .pls{color:var(--red-deep);font-weight:800;font-size:18px}
+  .selrow{display:flex;gap:22px;justify-content:center;width:100%}
+  .seltile{background:none;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:12px;
+    color:var(--red-deep);font-weight:800;font-size:15px;transition:transform .1s;flex:1}
+  .seltile:active{transform:scale(.95)}
+  .seltile .tc{width:88px;height:88px;border-radius:50%;background:#2F74E6;display:grid;place-items:center;color:#fff}
+  .seltile .tc svg{width:44px;height:44px}
+
+  /* ---------- signatures / capture ---------- */
+  .sec-head{font-size:13px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;
+    margin:20px 0 9px}
+  .sig-btn{width:100%;background:#fff;border:1.5px dashed var(--field-line);border-radius:12px;padding:15px 14px;
+    cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left;margin-bottom:10px;transition:.12s}
+  .sig-btn:hover{border-color:var(--red)}
+  .sig-btn .si{flex:none;width:40px;height:40px;border-radius:10px;background:var(--red-soft);color:var(--red);
+    display:grid;place-items:center}
+  .sig-btn .si svg{width:21px;height:21px}
+  .sig-btn .st2{flex:1;min-width:0}
+  .sig-btn .st2 b{display:block;font-size:14.5px;font-weight:800}
+  .sig-btn .st2 span{display:block;font-size:12px;color:var(--sub);margin-top:2px}
+  .sig-btn img{flex:none;width:78px;height:40px;object-fit:contain;display:none;background:#fff}
+  .sig-btn.signed{border-style:solid;border-color:var(--green)}
+  .sig-btn.signed .si{background:var(--green-soft);color:var(--green)}
+  .sig-btn.signed img{display:block}
+
+  .dropzone{background:#fff;border:1.5px dashed var(--field-line);border-radius:12px;padding:16px;text-align:center}
+  .dz-hint{margin:0 0 14px;font-size:13.5px;color:var(--sub)}
+  .capgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .captile{background:var(--field);border:1px solid var(--field-line);border-radius:11px;padding:13px 6px;
+    cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12px;font-weight:700;
+    color:var(--sub)}
+  .captile:active{transform:translateY(1px)}
+  .captile svg{width:22px;height:22px;color:var(--red)}
+  .thumb{display:none;width:100%;margin-top:14px;border-radius:10px;border:1px solid var(--line)}
+
+  /* ---------- notice ---------- */
+  .notice{display:flex;gap:10px;align-items:flex-start;background:var(--amber-soft);border:1px solid #F0DBB4;
+    border-radius:12px;padding:12px 13px;font-size:12.5px;line-height:1.5;color:#6E4405;margin-top:16px}
+  .notice svg{flex:none;width:16px;height:16px;margin-top:1px}
+  .notice.info{background:#EAF1FE;border-color:#C8DAFA;color:#1B3E7E}
+
+  /* ---------- success ---------- */
+  .success{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:0;padding:30px 28px;text-align:center}
+  .tick{width:96px;height:96px;border-radius:50%;background:var(--green-soft);color:var(--green);
+    display:grid;place-items:center;margin-bottom:24px}
+  .tick svg{width:50px;height:50px}
+  .success h3{margin:0 0 8px;font-size:25px;font-weight:800;letter-spacing:-.02em}
+  .success p{margin:0;font-size:14.5px;color:var(--sub);line-height:1.55}
+  .success .dk{margin:20px 0 6px;font-family:var(--mono);font-weight:800;font-size:18px;background:var(--field);
+    border:1px solid var(--field-line);border-radius:10px;padding:11px 18px}
+  .success .stamp{font-size:12.5px;color:var(--sub);margin-bottom:26px}
+  .success .home{width:100%;border:0;background:var(--red);color:#fff;font-size:16px;font-weight:800;
+    padding:15px;border-radius:12px;cursor:pointer}
+  .success .again{margin-top:10px;background:none;border:0;color:var(--red-deep);font-weight:700;
+    font-size:14px;text-decoration:underline;cursor:pointer}
+
+  /* ---------- shift view ---------- */
+  .shiftcard{margin:0 16px 14px;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+  .shiftcard h4{margin:0 0 14px;font-size:16px;font-weight:800}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:9px 14px;font-size:13.5px}
+  .kv dt{color:var(--sub);font-weight:600}
+  .kv dd{margin:0;font-weight:700;text-align:right}
+  .statrow{display:flex;gap:12px;margin:0 16px 14px}
+  .stat{flex:1;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:15px;text-align:center}
+  .stat b{display:block;font-size:27px;font-weight:800;letter-spacing:-.02em}
+  .stat span{display:block;font-size:11.5px;color:var(--sub);font-weight:600;margin-top:3px}
+  .danger{width:calc(100% - 32px);margin:4px 16px 0;border:1.5px solid var(--red);background:#fff;color:var(--red);
+    font-size:14.5px;font-weight:800;padding:14px;border-radius:12px;cursor:pointer}
+
+  /* ---------- modal ---------- */
+  .modal{position:absolute;inset:0;z-index:80;background:rgba(12,15,20,.55);display:none;
+    align-items:flex-end;justify-content:center}
+  .modal.on{display:flex}
+  .sheet{width:100%;background:#fff;border-radius:20px 20px 40px 40px;padding:18px 18px 22px;
+    animation:up .24s ease}
+  @keyframes up{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+  .sheet h4{margin:0 0 4px;font-size:18px;font-weight:800}
+  .sheet .sp{margin:0 0 14px;font-size:13px;color:var(--sub)}
+  .pad{position:relative;background:var(--field);border:1px solid var(--field-line);border-radius:12px;
+    height:180px;overflow:hidden;touch-action:none}
+  .pad canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
+  .pad .base{position:absolute;left:16px;right:16px;bottom:44px;border-bottom:1.5px dashed #C2C7D0;pointer-events:none}
+  .pad .ph{position:absolute;left:0;right:0;bottom:16px;text-align:center;font-size:12px;color:var(--faint);
+    pointer-events:none}
+  .sheetrow{display:flex;gap:10px;margin-top:14px}
+  .sheetrow button{flex:1;border-radius:11px;padding:14px;font-size:15px;font-weight:800;cursor:pointer}
+  .sheetrow .clear{border:1.5px solid var(--field-line);background:#fff;color:var(--sub)}
+  .sheetrow .save{border:0;background:var(--red);color:#fff}
+  .sheetrow .save:disabled{background:#C9CDD4}
+
+  /* ---------- toast ---------- */
+  .toast{position:absolute;left:50%;bottom:96px;transform:translate(-50%,14px);z-index:90;
+    background:rgba(20,24,32,.94);color:#fff;font-size:13px;font-weight:600;padding:11px 16px;border-radius:10px;
+    max-width:80%;text-align:center;opacity:0;pointer-events:none;transition:.24s}
+  .toast.on{opacity:1;transform:translate(-50%,0)}
+
+  /* ---------- notes panel ---------- */
+  .notes{width:430px;max-width:100%;display:flex;flex-direction:column;gap:14px}
+  .notes.off{display:none}
+  .ncard{background:var(--panel);border:1px solid var(--panel-line);border-radius:16px;padding:18px 20px;
+    backdrop-filter:blur(8px)}
+  .ncard h3{margin:0 0 4px;font-size:15px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;gap:9px}
+  .ncard h3 .n{flex:none;width:22px;height:22px;border-radius:7px;background:var(--red);color:#fff;
+    display:grid;place-items:center;font-size:11.5px;font-weight:800}
+  .ncard h3 .n.g{background:var(--green)}
+  .ncard h3 .n.a{background:#B4690E}
+  .ncard p{margin:10px 0 0;font-size:13.5px;line-height:1.6;color:var(--page-sub)}
+  .ncard ul{margin:10px 0 0;padding-left:20px;font-size:13.5px;line-height:1.65;color:var(--page-sub)}
+  .ncard li+li{margin-top:6px}
+  .ncard li b,.ncard p b{color:var(--page-ink);font-weight:700}
+  .ncard .step{background:none;border:1px solid var(--panel-line);color:var(--page-ink);font-size:12px;
+    font-weight:700;padding:6px 11px;border-radius:8px;cursor:pointer;margin-top:12px}
+  .ncard code{font-family:var(--mono);font-size:12px;background:var(--panel-line);padding:1px 5px;border-radius:4px}
+  .q{counter-reset:q}
+  .q li{list-style:none;position:relative;padding-left:26px;counter-increment:q}
+  .q li::before{content:counter(q);position:absolute;left:0;top:1px;width:18px;height:18px;border-radius:5px;
+    background:var(--panel-line);color:var(--page-ink);font-size:10.5px;font-weight:800;display:grid;place-items:center}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <p class="eyebrow">Meaney App &mdash; Proposed Change</p>
+  <h1>Haulier access, no login</h1>
+  <p>A third sign-in type beside Employee and Subcontractor. A haulage driver picks their company,
+     types their name and reg, and lands straight on Agg Loads to do dockets &mdash; no account, no password,
+     nothing for the office to set up per driver.</p>
+  <p class="quote">&ldquo;Is there a way that each driver doesn&rsquo;t have to have a profile and basically they
+     add their company and name and away they go to be able to do dockets?&rdquo;</p>
+</header>
+
+<div class="toolbar">
+  <button class="tbtn" id="notesBtn" aria-pressed="true">Notes panel</button>
+  <button class="tbtn" id="themeBtn">Dark / light</button>
+  <button class="tbtn" id="resetBtn">Reset demo</button>
+</div>
+
+<div class="stage">
+
+  <!-- ================= PHONE ================= -->
+  <div class="phone">
+    <div class="screen">
+
+      <div class="statusbar">
+        <span id="clock">15:24</span>
+        <span class="r">
+          <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="14" width="3.4" height="6" rx="1"/><rect x="7.4" y="10.5" width="3.4" height="9.5" rx="1"/><rect x="12.8" y="7" width="3.4" height="13" rx="1" opacity=".35"/><rect x="18.2" y="3.5" width="3.4" height="16.5" rx="1" opacity=".35"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 19.2a1.6 1.6 0 100-3.2 1.6 1.6 0 000 3.2zM7.6 14.4a6.2 6.2 0 018.8 0l1.6-1.7a8.6 8.6 0 00-12 0l1.6 1.7zM4 10.9a11.3 11.3 0 0116 0l1.7-1.8a13.7 13.7 0 00-19.4 0L4 10.9z"/></svg>
+          <svg viewBox="0 0 26 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="8" width="18" height="9" rx="2.6"/><rect x="3.6" y="9.6" width="5" height="5.8" rx="1.2" fill="currentColor" stroke="none"/><path d="M21.6 11.4v3" stroke-linecap="round"/></svg>
+        </span>
+      </div>
+
+      <div class="views" id="views">
+
+        <!-- ---------- 1. SIGN IN ---------- -->
+        <section class="view active" data-view="signin">
+          <div class="signin">
+            <span class="logo"><span class="nm">MEANEY</span><span class="st">PLANT &amp; CIVIL</span></span>
+            <h2>Sign In</h2>
+            <div class="roles">
+              <button class="role fill" data-role="Employee">Employee</button>
+              <button class="role ghost" data-role="Subcontractor">Subcontractor</button>
+              <button class="role ghost new" data-go="entry" id="haulierBtn">
+                <span class="tag">New</span>
+                Haulier
+                <span class="cap" id="haulierCap">No login needed &mdash; company &amp; name only</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- 2. HAULIER ENTRY ---------- -->
+        <section class="view" data-view="entry">
+          <div class="topbar">
+            <button class="rbtn" data-nav="signin" aria-label="Back">%ARROW%</button>
+            <div class="ttl">Haulier</div>
+            <span></span>
+          </div>
+          <div class="scroll">
+            <div class="body">
+              <p class="lede">No account and no password. Tell us who you are and which lorry you&rsquo;re in,
+                and you can start doing dockets.</p>
+
+              <div class="flabel">Haulage company <span class="req">*</span></div>
+              <select class="control" id="fCompany">
+                <option value="">Select your company</option>
+              </select>
+              <p class="hint">Chosen from the hauliers Meaney has approved &mdash; not free text, so dockets always
+                match a real supplier account.</p>
+
+              <div class="flabel">Driver name <span class="req">*</span></div>
+              <input class="control" id="fDriver" placeholder="e.g. John Kavanagh" autocomplete="name">
+
+              <div class="flabel">Vehicle reg <span class="req">*</span></div>
+              <input class="control reg" id="fReg" placeholder="12-D-45678" maxlength="12">
+
+              <div class="flabel">Mobile <span style="font-weight:600;text-transform:none;letter-spacing:0">(optional)</span></div>
+              <input class="control" id="fPhone" placeholder="087 000 0000" inputmode="tel">
+
+              <label class="check on" id="fRemember">
+                <span class="box">%CHECK%</span>
+                <span>Remember me on this lorry&rsquo;s phone &mdash; skip this screen tomorrow</span>
+              </label>
+
+              <div class="notice info">
+                %INFO%
+                <span>Every docket is stamped with this company, name and reg automatically. The driver never
+                  types them again.</span>
+              </div>
+            </div>
+          </div>
+          <div class="formfoot">
+            <button class="cta" id="startBtn" disabled>Start doing dockets</button>
+            <button class="cta sub" data-go="request">My company isn&rsquo;t on the list</button>
+          </div>
+        </section>
+
+        <!-- ---------- 3. REQUEST ACCESS ---------- -->
+        <section class="view" data-view="request">
+          <div class="topbar">
+            <button class="rbtn" data-nav="entry" aria-label="Back">%ARROW%</button>
+            <div class="ttl">Request access</div>
+            <span></span>
+          </div>
+          <div class="scroll">
+            <div class="body">
+              <p class="lede">Send your details to the Meaney office. Once they add your company you&rsquo;ll
+                find it in the list &mdash; still no password to remember.</p>
+
+              <div class="flabel">Company name <span class="req">*</span></div>
+              <input class="control" placeholder="Haulage company name">
+              <div class="flabel">Contact name <span class="req">*</span></div>
+              <input class="control" placeholder="Who Meaney should ring">
+              <div class="flabel">Mobile <span class="req">*</span></div>
+              <input class="control" placeholder="087 000 0000" inputmode="tel">
+              <div class="flabel">Number of lorries</div>
+              <select class="control">
+                <option>1&ndash;2</option><option>3&ndash;5</option><option>6&ndash;10</option><option>10+</option>
+              </select>
+
+              <div class="notice">
+                %WARN%
+                <span>This is the only gate on the whole flow. Approving the company once is what stops
+                  anyone with the app claiming to be a Meaney haulier.</span>
+              </div>
+            </div>
+          </div>
+          <div class="formfoot">
+            <button class="cta" data-toast="Request sent to the Meaney office" data-nav="entry">Send request</button>
+          </div>
+        </section>
+
+        <!-- ---------- 4. DASHBOARD ---------- -->
+        <section class="view" data-view="dash">
+          <div class="apphead">
+            <button class="circ" data-nav="dash" aria-label="Home">%HOME%</button>
+            <span class="logo sm"><span class="nm">MEANEY</span><span class="st">PLANT &amp; CIVIL</span></span>
+            <button class="grid4" data-toast="Agg Loads is the only module open to hauliers" aria-label="Modules">
+              <i></i><i></i><i></i><i></i>
+            </button>
+          </div>
+
+          <div class="scroll">
+            <div class="whostrip" id="whoStrip">
+              <span class="av" data-initials>JK</span>
+              <span class="t"><b data-who-company>&mdash;</b><span data-who-driver>&mdash;</span></span>
+              <button class="end" data-nav="shift">Shift</button>
+            </div>
+
+            <button class="filterpill" id="filterBtn">%FILTER% Show Filters</button>
+            <div class="filterbox" id="filterBox">
+              <div class="fr">
+                <div>
+                  <div class="flabel" style="margin-top:0">From</div>
+                  <input class="control" type="date" value="2026-08-17">
+                </div>
+                <div>
+                  <div class="flabel" style="margin-top:0">To</div>
+                  <input class="control" type="date" value="2026-08-17">
+                </div>
+              </div>
+              <div class="flabel">Status</div>
+              <select class="control"><option>All</option><option>Submitted</option><option>Draft</option></select>
+            </div>
+
+            <div class="loadcard">
+              <div class="lc-head">
+                <h3>Active Loads</h3>
+                <p><span data-count>0</span> <span data-load-word>loads</span> scheduled today</p>
+              </div>
+              <div class="lhead">
+                <span>Load ID</span><span>Docket No.</span><span>Date</span><span>Customer</span>
+              </div>
+              <div id="loadList"></div>
+              <div class="empty" id="loadEmpty">No Active Loads Found</div>
+            </div>
+
+            <div class="actioncard">
+              <button class="act" data-go="picker"><span class="circle">%PLUS%</span>New Load</button>
+              <button class="act" data-nav="signin"><span class="circle">%ARROW%</span>Back</button>
+            </div>
+            <div style="height:18px"></div>
+          </div>
+
+          <nav class="bottomnav">
+            <button class="navbtn on" data-nav="dash">%HOMEF%Dashboard</button>
+            <button class="navbtn" data-nav="shift">%TRUCK2%My Loads</button>
+            <button class="navbtn locked" data-toast="Health &amp; Safety is for Meaney staff and subcontractors">%HAT%H&amp;S %LOCK%</button>
+            <button class="navbtn locked" data-toast="Projects is hidden from haulier sign-ins">%CASE%Projects %LOCK%</button>
+          </nav>
+        </section>
+
+        <!-- ---------- 5. PICKER ---------- -->
+        <section class="view" data-view="picker">
+          <div class="topbar">
+            <button class="rbtn" data-nav="dash" aria-label="Back">%ARROW%</button>
+            <div class="ttl">New Load</div>
+            <span></span>
+          </div>
+          <div class="scroll">
+            <div class="picker-body">
+              <div class="selectcard">
+                <div class="pls">Please Select</div>
+                <div class="selrow">
+                  <button class="seltile" data-go="form1" data-type="site"><span class="tc">%TRUCK%</span>Site Collection</button>
+                  <button class="seltile" data-go="form1" data-type="quarry"><span class="tc">%TRUCK%</span>Quarry Collection</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- 6. DOCKET FORM 1 ---------- -->
+        <section class="view" data-view="form1">
+          <div class="topbar">
+            <button class="rbtn" data-nav="picker" aria-label="Back">%ARROW%</button>
+            <div class="ttl" data-form-title>Collection Information</div>
+            <span></span>
+          </div>
+          <div class="scroll">
+            <div class="body">
+              <div class="lockcard">
+                <div class="lh">%LOCK2% Stamped automatically &mdash; read only</div>
+                <dl>
+                  <dt>Docket No.</dt><dd data-docket>&mdash;</dd>
+                  <dt>Haulier</dt><dd data-stamp-company style="font-family:var(--ui)">&mdash;</dd>
+                  <dt>Driver</dt><dd data-stamp-driver style="font-family:var(--ui)">&mdash;</dd>
+                  <dt>Reg</dt><dd data-stamp-reg>&mdash;</dd>
+                </dl>
+              </div>
+
+              <div class="flabel">Customer <span class="req">*</span></div>
+              <select class="control" id="fCustomer"><option value="">Select Customer</option></select>
+
+              <div class="flabel">Customer order number</div>
+              <input class="control" placeholder="Order number">
+
+              <div class="flabel" data-lbl-from>Collection address <span class="req">*</span></div>
+              <select class="control" id="fFrom"><option value="">Select address</option></select>
+
+              <div class="flabel">Delivery address <span class="req">*</span></div>
+              <select class="control" id="fTo"><option value="">Select address</option></select>
+
+              <div class="flabel">Category</div>
+              <select class="control" id="fCat"><option value="">Select category</option></select>
+
+              <div class="flabel">Type</div>
+              <select class="control" id="fType"><option value="">Select type</option></select>
+
+              <div class="flabel">Weight (tonne)</div>
+              <input class="control" type="number" placeholder="0.00" step="0.01" id="fWeight">
+
+              <div class="flabel">Comments</div>
+              <textarea class="control" placeholder="Anything the office should know&hellip;"></textarea>
+            </div>
+          </div>
+          <div class="formfoot"><button class="cta" data-go="form2">Next</button></div>
+        </section>
+
+        <!-- ---------- 7. DOCKET FORM 2 ---------- -->
+        <section class="view" data-view="form2">
+          <div class="topbar">
+            <button class="rbtn" data-nav="form1" aria-label="Back">%ARROW%</button>
+            <div class="ttl">Signatures &amp; Docket</div>
+            <span></span>
+          </div>
+          <div class="scroll">
+            <div class="body">
+              <div class="sec-head">Signatures</div>
+
+              <button class="sig-btn" data-sig="customer" aria-label="Customer signature">
+                <span class="si">%PEN%</span>
+                <span class="st2"><b>Customer signature</b><span data-sig-sub="customer">Tap to sign</span></span>
+                <img alt="" data-sig-img="customer">
+              </button>
+
+              <button class="sig-btn" data-sig="driver" aria-label="Driver signature">
+                <span class="si">%PEN%</span>
+                <span class="st2"><b>Driver signature</b><span data-sig-sub="driver">Tap to sign</span></span>
+                <img alt="" data-sig-img="driver">
+              </button>
+
+              <div class="notice">
+                %WARN%
+                <span>With no account behind the driver, the signature is a drawn mark plus the name typed at
+                  sign-in. Good enough for a delivery docket &mdash; weaker than the account-tied signature the
+                  dayworks sheets need.</span>
+              </div>
+
+              <div class="sec-head">Docket image</div>
+              <div class="dropzone">
+                <p class="dz-hint">Take a photo of the weighbridge or quarry docket</p>
+                <div class="capgrid">
+                  <button class="captile" data-capture>%CAM%Camera</button>
+                  <button class="captile" data-capture>%GALLERY%Device</button>
+                  <button class="captile" data-capture>%SCAN%Scan</button>
+                </div>
+                <img class="thumb" alt="Captured docket" id="docketThumb">
+              </div>
+            </div>
+          </div>
+          <div class="formfoot"><button class="cta" id="submitBtn">Submit docket</button></div>
+        </section>
+
+        <!-- ---------- 8. SUCCESS ---------- -->
+        <section class="view" data-view="success">
+          <div class="success">
+            <div class="tick">%BIGCHECK%</div>
+            <h3>Docket submitted</h3>
+            <p>Sent to the Meaney office and added to your loads for today.</p>
+            <div class="dk" data-success-docket>&mdash;</div>
+            <div class="stamp" data-success-stamp>&mdash;</div>
+            <button class="home" data-nav="dash">Back to Loads</button>
+            <button class="again" data-go="picker">Start another load</button>
+          </div>
+        </section>
+
+        <!-- ---------- 9. SHIFT ---------- -->
+        <section class="view" data-view="shift">
+          <div class="topbar">
+            <button class="rbtn" data-nav="dash" aria-label="Back">%ARROW%</button>
+            <div class="ttl">My Shift</div>
+            <span></span>
+          </div>
+          <div class="scroll">
+            <div style="height:14px"></div>
+            <div class="statrow">
+              <div class="stat"><b data-count>0</b><span>Dockets today</span></div>
+              <div class="stat"><b data-tonnes>0</b><span>Tonnes today</span></div>
+            </div>
+            <div class="shiftcard">
+              <h4>Signed in as</h4>
+              <dl class="kv">
+                <dt>Company</dt><dd data-who-company>&mdash;</dd>
+                <dt>Driver</dt><dd data-stamp-driver style="font-family:inherit">&mdash;</dd>
+                <dt>Vehicle</dt><dd data-stamp-reg>&mdash;</dd>
+                <dt>Device</dt><dd>Remembered</dd>
+              </dl>
+            </div>
+            <div class="shiftcard">
+              <h4>Today&rsquo;s dockets</h4>
+              <div id="shiftList" style="font-size:13.5px;color:var(--sub)">No dockets yet.</div>
+            </div>
+            <div class="shiftcard" style="padding:14px">
+              <button class="cta" id="switchDriver" style="font-size:15px;padding:14px">Switch driver on this lorry</button>
+              <p class="hint" style="text-align:center;margin-top:9px">Keeps today&rsquo;s dockets. Next driver types
+                their name and reg &mdash; company stays.</p>
+            </div>
+            <button class="danger" id="endShift">End shift &amp; forget this device</button>
+            <div style="height:22px"></div>
+          </div>
+          <nav class="bottomnav">
+            <button class="navbtn" data-nav="dash">%HOMEF%Dashboard</button>
+            <button class="navbtn on" data-nav="shift">%TRUCK2%My Loads</button>
+            <button class="navbtn locked" data-toast="Health &amp; Safety is for Meaney staff and subcontractors">%HAT%H&amp;S %LOCK%</button>
+            <button class="navbtn locked" data-toast="Projects is hidden from haulier sign-ins">%CASE%Projects %LOCK%</button>
+          </nav>
+        </section>
+
+      </div><!-- /views -->
+
+      <!-- signature modal -->
+      <div class="modal" id="sigModal">
+        <div class="sheet">
+          <h4 data-sig-title>Signature</h4>
+          <p class="sp">Sign on the line below.</p>
+          <div class="pad" id="pad">
+            <canvas id="sigCanvas"></canvas>
+            <div class="base"></div>
+            <div class="ph" id="sigPh">Sign here</div>
+          </div>
+          <div class="sheetrow">
+            <button class="clear" id="sigClear">Clear</button>
+            <button class="save" id="sigSave" disabled>Save signature</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="toast" id="toast"></div>
+
+      <div class="homebar"><i></i></div>
+    </div>
+  </div>
+
+  <!-- ================= NOTES ================= -->
+  <aside class="notes" id="notes">
+
+    <div class="ncard">
+      <h3><span class="n g">1</span>A third button, not a third account system</h3>
+      <p>Employee and Subcontractor keep their password logins. <b>Haulier</b> sits under them with no
+        credentials at all &mdash; because the office is never going to create and reset accounts for
+        every agency driver who turns up in a lorry.</p>
+      <button class="step" data-go="signin">Show sign-in screen</button>
+    </div>
+
+    <div class="ncard">
+      <h3><span class="n g">2</span>Company from a list, name and reg free</h3>
+      <p>The one field that isn&rsquo;t free text is the <b>company</b>. It comes from the hauliers Meaney has
+        approved, so every docket ties back to a real supplier account and self-billing still works. Driver
+        name and reg are typed &mdash; and the reg is what actually identifies the load on site.</p>
+      <p>Free-text company names would give you &ldquo;Byrnes&rdquo;, &ldquo;Byrne Haulage&rdquo; and
+        &ldquo;byrne haulage ltd&rdquo; as three different suppliers inside a week.</p>
+      <button class="step" data-go="entry">Show entry screen</button>
+    </div>
+
+    <div class="ncard">
+      <h3><span class="n g">3</span>Typed once, stamped on every docket</h3>
+      <p>Company, driver and reg are remembered on the device and printed read-only at the top of each
+        docket. The driver never retypes them, and the office always knows who submitted what.</p>
+      <button class="step" data-go="form1">Show docket form</button>
+    </div>
+
+    <div class="ncard">
+      <h3><span class="n g">4</span>Day two is one tap</h3>
+      <p>Once the lorry&rsquo;s phone remembers the driver, tapping <b>Haulier</b> goes straight to Active Loads
+        &mdash; the entry screen never appears again. Handing the phone to a second driver is a
+        <b>Switch driver</b> button on the Shift screen: company stays, name and reg clear.</p>
+      <p>Try it: sign in, then hit <code>Reset demo</code> or reload the page and tap Haulier again.</p>
+      <button class="step" data-go="shift">Show shift screen</button>
+    </div>
+
+    <div class="ncard">
+      <h3><span class="n g">5</span>Agg Loads and nothing else</h3>
+      <p>A haulier sign-in lands on Active Loads and can only reach the docket flow. Health &amp; Safety and
+        Projects stay visibly locked, and the module grid is closed &mdash; the same hard restriction the
+        contractor dayworks login uses.</p>
+      <button class="step" data-go="dash">Show dashboard</button>
+    </div>
+
+    <div class="ncard">
+      <h3><span class="n a">!</span>What you give up by dropping the login</h3>
+      <ul>
+        <li><b>Nobody is verified.</b> Anyone with the app can pick an approved company and type any name.
+          The approved-company list is the only gate.</li>
+        <li><b>The signature is weaker.</b> A drawn mark plus a self-typed name, not tied to an account.
+          Fine for a delivery docket; it would not satisfy the dayworks signature requirement.</li>
+        <li><b>Drivers aren&rsquo;t deduplicated.</b> &ldquo;J Kavanagh&rdquo; and &ldquo;John Kavanagh&rdquo;
+          are two people to the system. Reg is the reliable key, not the name.</li>
+        <li><b>Anyone can submit against any customer.</b> Worth restricting the customer list per haulier,
+          or letting the office reject a docket before it&rsquo;s billable.</li>
+        <li><b>Driver names and mobiles are still personal data</b> even with no account &mdash; they need a
+          retention rule.</li>
+      </ul>
+    </div>
+
+    <div class="ncard">
+      <h3><span class="n">?</span>Worth a cheap safeguard</h3>
+      <p>If &ldquo;anyone can claim to be a haulier&rdquo; is too loose, the smallest fix that keeps the
+        no-login promise is a <b>4-digit job code</b> the site foreman reads out. One code per site per week,
+        typed once on the entry screen. No accounts, but it stops a stranger submitting dockets.</p>
+    </div>
+
+    <div class="ncard">
+      <h3><span class="n">?</span>Open questions before build</h3>
+      <ol class="q">
+        <li>Who maintains the approved haulier list &mdash; office admin screen, or is it the existing
+          supplier list in the back office?</li>
+        <li>Does a haulier docket land straight in with employee dockets, or into a review queue the office
+          approves first?</li>
+        <li>Should the customer list be restricted to the sites that haulier is actually working on?</li>
+        <li>Can a driver open and edit a docket after submitting, or is it locked?</li>
+        <li>Two drivers sharing one lorry phone &mdash; does &ldquo;remember me&rdquo; need a quick switch?</li>
+        <li>Does the office need to see &ldquo;which reg is on site right now&rdquo;, or only completed dockets?</li>
+        <li>Is a customer signature mandatory on a haulier docket, or photo-of-docket enough?</li>
+        <li>How long are driver name and mobile kept after the job ends?</li>
+      </ol>
+    </div>
+
+  </aside>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- icons ---------------- */
+  var I = {
+    ARROW:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
+    HOME:   '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.2 2.6 11h2.6v9.2h5V14h3.6v6.2h5V11h2.6L12 3.2z"/></svg>',
+    HOMEF:  '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.2 2.6 11h2.6v9.2h5V14h3.6v6.2h5V11h2.6L12 3.2z"/></svg>',
+    PLUS:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+    FILTER: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 6h18M6 12h12M10 18h4"/></svg>',
+    CHECK:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+    BIGCHECK:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M8 12.4l2.8 2.8L16.4 9.6"/></svg>',
+    TRUCK:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h11v9H2zM13 10h4.4l3.6 3.6V16h-8z"/><circle cx="6.4" cy="18.4" r="1.9"/><circle cx="17" cy="18.4" r="1.9"/></svg>',
+    TRUCK2: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h11v9H2zM13 10h4.4l3.6 3.6V16h-8z"/><circle cx="6.4" cy="18.4" r="1.9"/><circle cx="17" cy="18.4" r="1.9"/></svg>',
+    HAT:    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4c-1 0-1.8.8-1.8 1.8v.6C7.2 7.3 5 10 5 13.2V15h14v-1.8c0-3.2-2.2-5.9-5.2-6.8v-.6C13.8 4.8 13 4 12 4zM3.4 16.4h17.2c.5 0 .9.4.9.9v.6c0 .5-.4.9-.9.9H3.4a.9.9 0 01-.9-.9v-.6c0-.5.4-.9.9-.9z"/></svg>',
+    CASE:   '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 3.4h5.2c.9 0 1.6.7 1.6 1.6v1.4h3.4c1 0 1.8.8 1.8 1.8v9.4c0 1-.8 1.8-1.8 1.8H4.4c-1 0-1.8-.8-1.8-1.8V8.2c0-1 .8-1.8 1.8-1.8h3.4V5c0-.9.7-1.6 1.6-1.6zm.2 3h4.8V5.2H9.6v1.2z"/></svg>',
+    LOCK:   '<svg viewBox="0 0 24 24" fill="currentColor" style="width:11px;height:11px;display:inline-block;vertical-align:-1px"><path d="M12 2.6a4.4 4.4 0 00-4.4 4.4v2.2H6.8c-.9 0-1.6.7-1.6 1.6v8c0 .9.7 1.6 1.6 1.6h10.4c.9 0 1.6-.7 1.6-1.6v-8c0-.9-.7-1.6-1.6-1.6h-.8V7A4.4 4.4 0 0012 2.6zm-2.4 4.4a2.4 2.4 0 014.8 0v2.2H9.6V7z"/></svg>',
+    LOCK2:  '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.6a4.4 4.4 0 00-4.4 4.4v2.2H6.8c-.9 0-1.6.7-1.6 1.6v8c0 .9.7 1.6 1.6 1.6h10.4c.9 0 1.6-.7 1.6-1.6v-8c0-.9-.7-1.6-1.6-1.6h-.8V7A4.4 4.4 0 0012 2.6zm-2.4 4.4a2.4 2.4 0 014.8 0v2.2H9.6V7z"/></svg>',
+    PEN:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.9l3.6 3.6L8.4 19.2l-4.6 1 1-4.6z"/><path d="M3.2 21.6h17.6"/></svg>',
+    CAM:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.6h3.2l1.4-2.2h8.8l1.4 2.2H21v10H3z"/><circle cx="12" cy="13.4" r="3.2"/></svg>',
+    GALLERY:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.6" width="18" height="14.8" rx="2.2"/><circle cx="8.6" cy="9.8" r="1.6"/><path d="M4 17l5-5 4 4 3-2.4 4 3.4"/></svg>',
+    SCAN:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.4V6a2 2 0 012-2h2.4M15.6 4H18a2 2 0 012 2v2.4M20 15.6V18a2 2 0 01-2 2h-2.4M8.4 20H6a2 2 0 01-2-2v-2.4M3.4 12h17.2"/></svg>',
+    INFO:   '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8a9.2 9.2 0 100 18.4 9.2 9.2 0 000-18.4zm0 4a1.3 1.3 0 110 2.6 1.3 1.3 0 010-2.6zm1.2 10.8h-2.4v-6.4h2.4z"/></svg>',
+    WARN:   '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8 1.6 21.2h20.8L12 2.8zm-1.2 6h2.4v6.4h-2.4zm0 8h2.4v2.4h-2.4z"/></svg>'
+  };
+  document.getElementById('views').innerHTML =
+    document.getElementById('views').innerHTML.replace(/%([A-Z0-9]+)%/g, function(m,k){ return I[k] || m; });
+
+  /* ---------------- reference data ---------------- */
+  var COMPANIES = [
+    'Byrne Haulage Ltd','Kavanagh Transport','Tobin Bulk Haulage',
+    "O'Reilly Plant & Haulage",'Walsh Tipper Hire','Nolan Aggregates Transport'
+  ];
+  var CUSTOMERS = ['Collen Construction','John Sisk & Son','Lagan Construction','Westar Ltd','Meaney &mdash; internal'];
+  var ADDRESSES = ['Ballymount Yard, D12','Naas Road Depot','Kildare Quarry','Clondalkin Site 4','Newbridge Compound'];
+  var CATS = {
+    site:   ['Muck Away','Aggregate Supply','Recycling','Ready-Mix Concrete'],
+    quarry: ['Stone Supply','Sand & Gravel','Recycled Fill','Waste Collection']
+  };
+  var TYPES = {
+    'Muck Away':['Clay','Topsoil','Mixed Spoil'],
+    'Aggregate Supply':['804 Fill','Clause 804','20mm Stone','Dust'],
+    'Recycling':['Broken Concrete','Rubble','Green Waste'],
+    'Ready-Mix Concrete':['C25/30','C32/40'],
+    'Stone Supply':['6mm Chip','20mm Stone','40mm Stone'],
+    'Sand & Gravel':['Washed Sand','Building Sand','Pea Gravel'],
+    'Recycled Fill':['6F2','Type 1'],
+    'Waste Collection':['Inert','Mixed']
+  };
+
+  function fill(sel, list, placeholder){
+    var el = document.querySelector(sel);
+    if(!el) return;
+    el.innerHTML = '<option value="">'+placeholder+'</option>' +
+      list.map(function(v){ return '<option>'+v+'</option>'; }).join('');
+  }
+  fill('#fCompany', COMPANIES, 'Select your company');
+  fill('#fCustomer', CUSTOMERS, 'Select Customer');
+  fill('#fFrom', ADDRESSES, 'Select address');
+  fill('#fTo', ADDRESSES, 'Select address');
+
+  /* ---------------- state ---------------- */
+  var STORE = 'meaney-haulier-demo';
+  var session = null;              // {company, driver, reg, phone}
+  var loads = [];                  // {id, docket, date, customer, tonnes, status}
+  var flow = 'site';
+  var switching = false;           // true while handing the phone to the next driver
+  var current = null;              // docket being built
+  var sigs = {};                   // {customer:dataURL, driver:dataURL}
+  var seq = 4180;
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(STORE);
+      if(raw) session = JSON.parse(raw);
+    }catch(e){ /* private mode / file:// — demo just won't remember */ }
+  }
+  function save(){
+    try{
+      if(session) localStorage.setItem(STORE, JSON.stringify(session));
+      else localStorage.removeItem(STORE);
+    }catch(e){}
+  }
+  load();
+
+  /* ---------------- router ---------------- */
+  var views = {};
+  Array.prototype.forEach.call(document.querySelectorAll('.view'), function(v){
+    views[v.getAttribute('data-view')] = v;
+  });
+  var currentView = 'signin';
+
+  function go(name){
+    if(!views[name]) return;
+    // haulier screens need a session
+    var needs = {dash:1, picker:1, form1:1, form2:1, success:1, shift:1};
+    if(needs[name] && !session){ name = 'entry'; }
+    views[currentView].classList.remove('active');
+    views[name].classList.add('active');
+    currentView = name;
+    var sc = views[name].querySelector('.scroll');
+    if(sc) sc.scrollTop = 0;
+  }
+
+  var toastEl = document.getElementById('toast'), toastT;
+  function toast(msg){
+    toastEl.innerHTML = msg;
+    toastEl.classList.add('on');
+    clearTimeout(toastT);
+    toastT = setTimeout(function(){ toastEl.classList.remove('on'); }, 2200);
+  }
+
+  /* ---------------- entry form ---------------- */
+  var fCompany = document.getElementById('fCompany');
+  var fDriver  = document.getElementById('fDriver');
+  var fReg     = document.getElementById('fReg');
+  var fPhone   = document.getElementById('fPhone');
+  var startBtn = document.getElementById('startBtn');
+  var remember = document.getElementById('fRemember');
+
+  function validate(){
+    var ok = fCompany.value && fDriver.value.trim().length > 2 && fReg.value.trim().length > 3;
+    startBtn.disabled = !ok;
+  }
+  [fCompany, fDriver, fReg].forEach(function(el){
+    el.addEventListener('input', validate);
+    el.addEventListener('change', validate);
+  });
+  fReg.addEventListener('input', function(){
+    this.value = this.value.toUpperCase().replace(/[^A-Z0-9-]/g,'');
+  });
+  remember.addEventListener('click', function(e){
+    e.preventDefault();
+    this.classList.toggle('on');
+  });
+
+  startBtn.addEventListener('click', function(){
+    switching = false;
+    session = {
+      company: fCompany.value,
+      driver:  fDriver.value.trim(),
+      reg:     fReg.value.trim(),
+      phone:   fPhone.value.trim(),
+      remember: remember.classList.contains('on')
+    };
+    if(session.remember) save(); else { try{ localStorage.removeItem(STORE); }catch(e){} }
+    paintSession();
+    markRemembered();
+    go('dash');
+    toast('Signed in as ' + session.driver + ' &mdash; no account needed');
+  });
+
+  function initials(name){
+    return name.split(/\s+/).slice(0,2).map(function(w){ return w.charAt(0); }).join('').toUpperCase();
+  }
+  function setAll(attr, value){
+    Array.prototype.forEach.call(document.querySelectorAll('['+attr+']'), function(el){
+      el.textContent = value;
+    });
+  }
+  function paintSession(){
+    if(!session) return;
+    setAll('data-who-company', session.company);
+    setAll('data-who-driver', session.driver + '  ·  ' + session.reg);
+    setAll('data-stamp-company', session.company);
+    setAll('data-stamp-driver', session.driver);
+    setAll('data-stamp-reg', session.reg);
+    setAll('data-initials', initials(session.driver));
+  }
+
+  /* a remembered device skips the entry screen entirely */
+  function markRemembered(){
+    var cap = document.getElementById('haulierCap');
+    if(session){
+      cap.innerHTML = 'Remembered &mdash; ' + session.driver + ', ' + session.reg;
+    }else{
+      cap.innerHTML = 'No login needed &mdash; company &amp; name only';
+    }
+  }
+  if(session){
+    fCompany.value = session.company;
+    fDriver.value  = session.driver;
+    fReg.value     = session.reg;
+    fPhone.value   = session.phone || '';
+    validate();
+    paintSession();
+  }
+  markRemembered();
+
+  /* ---------------- loads list ---------------- */
+  function today(){
+    var d = new Date(2026, 7, 17); // fixed date so the demo reads consistently
+    function p(n){ return (n<10?'0':'') + n; }
+    return p(d.getDate()) + '/' + p(d.getMonth()+1) + '/' + d.getFullYear();
+  }
+
+  function renderLoads(){
+    var list = document.getElementById('loadList');
+    var empty = document.getElementById('loadEmpty');
+    list.innerHTML = loads.map(function(l){
+      return '<button class="lrow" data-open="'+l.docket+'">' +
+        '<span class="dk">'+l.id+'</span>' +
+        '<span class="dk">'+l.docket+'</span>' +
+        '<span>'+l.date+'</span>' +
+        '<span class="cu">'+l.customer+'</span>' +
+      '</button>';
+    }).join('');
+    empty.style.display = loads.length ? 'none' : 'grid';
+    setAll('data-count', String(loads.length));
+    setAll('data-load-word', loads.length === 1 ? 'load' : 'loads');
+
+    var t = loads.reduce(function(s,l){ return s + (parseFloat(l.tonnes)||0); }, 0);
+    setAll('data-tonnes', t ? (Math.round(t*10)/10) : '0');
+
+    var sl = document.getElementById('shiftList');
+    sl.innerHTML = loads.length
+      ? loads.map(function(l){
+          return '<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;'+
+                 'border-bottom:1px solid var(--line)"><b style="font-family:var(--mono)">'+l.docket+
+                 '</b><span>'+l.customer+'</span><span>'+(l.tonnes||'—')+' t</span></div>';
+        }).join('')
+      : 'No dockets yet.';
+  }
+  renderLoads();
+
+  /* ---------------- docket flow ---------------- */
+  function newDocket(type){
+    flow = type;
+    seq += 1;
+    current = { id: 'L-' + (7400 + loads.length + 1), docket: String(seq * 3 + 91), date: today() };
+    sigs = {};
+    setAll('data-docket', current.docket);
+
+    document.querySelector('[data-form-title]').textContent =
+      (type === 'site' ? 'Site' : 'Quarry') + ' Collection Information';
+    document.querySelector('[data-lbl-from]').innerHTML =
+      (type === 'site' ? 'Site collection address' : 'Quarry address') + ' <span class="req">*</span>';
+
+    fill('#fCat', CATS[type], 'Select category');
+    document.getElementById('fType').innerHTML = '<option value="">Select type</option>';
+    document.getElementById('fCustomer').value = '';
+    document.getElementById('fFrom').value = '';
+    document.getElementById('fTo').value = '';
+    document.getElementById('fWeight').value = '';
+
+    // reset signature + capture UI
+    Array.prototype.forEach.call(document.querySelectorAll('.sig-btn'), function(b){
+      b.classList.remove('signed');
+      var k = b.getAttribute('data-sig');
+      b.querySelector('[data-sig-img="'+k+'"]').removeAttribute('src');
+      b.querySelector('[data-sig-sub="'+k+'"]').textContent = 'Tap to sign';
+    });
+    var th = document.getElementById('docketThumb');
+    th.style.display = 'none';
+    th.removeAttribute('src');
+  }
+
+  document.getElementById('fCat').addEventListener('change', function(){
+    fill('#fType', TYPES[this.value] || [], 'Select type');
+  });
+
+  document.getElementById('submitBtn').addEventListener('click', function(){
+    if(!current){ return go('picker'); }
+    if(!sigs.driver){ return toast('Driver signature is required'); }
+    var cust = document.getElementById('fCustomer').value || 'Not set';
+    current.customer = cust;
+    current.tonnes = document.getElementById('fWeight').value || '';
+    loads.unshift(current);
+    renderLoads();
+
+    document.querySelector('[data-success-docket]').textContent = 'Docket ' + current.docket;
+    document.querySelector('[data-success-stamp]').textContent =
+      session.company + ' · ' + session.driver + ' · ' + session.reg;
+    current = null;
+    go('success');
+  });
+
+  /* ---------------- signature pad ---------------- */
+  var modal = document.getElementById('sigModal');
+  var canvas = document.getElementById('sigCanvas');
+  var ctx = canvas.getContext('2d');
+  var ph = document.getElementById('sigPh');
+  var saveBtn = document.getElementById('sigSave');
+  var drawn = false, drawing = false, activeSig = null;
+
+  function sizeCanvas(){
+    var r = canvas.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.max(1, Math.round(r.width * dpr));
+    canvas.height = Math.max(1, Math.round(r.height * dpr));
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.lineWidth = 2.4;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#16181D';
+  }
+  function pos(e){
+    var r = canvas.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+  canvas.addEventListener('pointerdown', function(e){
+    drawing = true;
+    try{ canvas.setPointerCapture(e.pointerId); }catch(err){ /* capture is a nicety, not required */ }
+    var p = pos(e);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    if(!drawn){ drawn = true; ph.style.display = 'none'; saveBtn.disabled = false; }
+  });
+  canvas.addEventListener('pointermove', function(e){
+    if(!drawing) return;
+    var p = pos(e);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+  });
+  ['pointerup','pointercancel','pointerleave'].forEach(function(ev){
+    canvas.addEventListener(ev, function(){ drawing = false; });
+  });
+
+  function openSig(key){
+    activeSig = key;
+    document.querySelector('[data-sig-title]').textContent =
+      (key === 'driver' ? 'Driver' : 'Customer') + ' signature';
+    modal.classList.add('on');
+    sizeCanvas();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawn = false;
+    ph.style.display = '';
+    saveBtn.disabled = true;
+  }
+  document.getElementById('sigClear').addEventListener('click', function(){
+    sizeCanvas();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawn = false;
+    ph.style.display = '';
+    saveBtn.disabled = true;
+  });
+  saveBtn.addEventListener('click', function(){
+    var url = canvas.toDataURL('image/png');
+    sigs[activeSig] = url;
+    var btn = document.querySelector('.sig-btn[data-sig="'+activeSig+'"]');
+    btn.classList.add('signed');
+    btn.querySelector('[data-sig-img="'+activeSig+'"]').src = url;
+    btn.querySelector('[data-sig-sub="'+activeSig+'"]').textContent =
+      activeSig === 'driver'
+        ? 'Signed — ' + session.driver + ' (' + session.company + ')'
+        : 'Signed on site · ' + today();
+    modal.classList.remove('on');
+    toast('Signature captured');
+  });
+  modal.addEventListener('click', function(e){
+    if(e.target === modal) modal.classList.remove('on');
+  });
+
+  /* ---------------- docket image ---------------- */
+  var DOCKET_IMG = 'data:image/svg+xml;base64,' + btoa(
+    "<svg xmlns='http://www.w3.org/2000/svg' width='340' height='200'>" +
+    "<rect width='340' height='200' fill='#EDEEF1'/>" +
+    "<rect x='18' y='14' width='304' height='172' rx='6' fill='#fff' stroke='#DDE1E7'/>" +
+    "<rect x='34' y='30' width='108' height='15' rx='3' fill='#E11922'/>" +
+    "<rect x='34' y='60' width='250' height='8' rx='3' fill='#D6DAE0'/>" +
+    "<rect x='34' y='77' width='214' height='8' rx='3' fill='#D6DAE0'/>" +
+    "<rect x='34' y='94' width='236' height='8' rx='3' fill='#D6DAE0'/>" +
+    "<rect x='34' y='120' width='92' height='8' rx='3' fill='#E6E9ED'/>" +
+    "<rect x='34' y='137' width='150' height='8' rx='3' fill='#E6E9ED'/>" +
+    "<text x='214' y='162' font-family='monospace' font-size='13' fill='#98A0AC'>WEIGHBRIDGE</text></svg>"
+  );
+
+  /* ---------------- global click routing ---------------- */
+  document.addEventListener('click', function(e){
+    var t = e.target.closest('[data-go],[data-nav],[data-role],[data-toast],[data-sig],[data-capture],[data-open]');
+    if(!t) return;
+
+    if(t.hasAttribute('data-toast')) toast(t.getAttribute('data-toast'));
+
+    if(t.hasAttribute('data-role')){
+      toast(t.getAttribute('data-role') + ' login is unchanged &mdash; this demo covers the Haulier route');
+      return;
+    }
+    if(t.hasAttribute('data-sig')){ openSig(t.getAttribute('data-sig')); return; }
+    if(t.hasAttribute('data-capture')){
+      var th = document.getElementById('docketThumb');
+      th.src = DOCKET_IMG;
+      th.style.display = 'block';
+      toast('Docket image captured');
+      return;
+    }
+    if(t.hasAttribute('data-open')){
+      toast('Docket ' + t.getAttribute('data-open') + ' &mdash; submitted, read only');
+      return;
+    }
+
+    var dest = t.getAttribute('data-go') || t.getAttribute('data-nav');
+    if(!dest) return;
+
+    /* day two: the device already knows the driver, so skip the entry screen */
+    if(dest === 'entry' && session && session.remember && !switching){
+      go('dash');
+      toast('Welcome back &mdash; ' + session.driver + ', ' + session.reg);
+      return;
+    }
+    if(dest === 'entry'){ switching = false; }
+    if(dest === 'form1' && t.hasAttribute('data-type')){ newDocket(t.getAttribute('data-type')); }
+    if(dest === 'form2' && !current){ dest = 'picker'; }
+
+    go(dest);
+  });
+
+  /* filters toggle */
+  var fBtn = document.getElementById('filterBtn'), fBox = document.getElementById('filterBox');
+  fBtn.addEventListener('click', function(){
+    var on = fBox.classList.toggle('on');
+    fBtn.innerHTML = I.FILTER + (on ? ' Hide Filters' : ' Show Filters');
+  });
+
+  /* hand the phone to the next driver — company stays, name and reg clear */
+  document.getElementById('switchDriver').addEventListener('click', function(){
+    switching = true;
+    fDriver.value = '';
+    fReg.value = '';
+    fPhone.value = '';
+    validate();
+    go('entry');
+    toast('Company kept &mdash; new driver enters name and reg');
+  });
+
+  /* end shift */
+  document.getElementById('endShift').addEventListener('click', function(){
+    session = null; loads = []; current = null; switching = false;
+    try{ localStorage.removeItem(STORE); }catch(e){}
+    renderLoads();
+    fCompany.value = ''; fDriver.value = ''; fReg.value = ''; fPhone.value = '';
+    validate();
+    markRemembered();
+    go('signin');
+    toast('Shift ended and device forgotten');
+  });
+
+  /* ---------------- page chrome ---------------- */
+  var notesBtn = document.getElementById('notesBtn'), notes = document.getElementById('notes');
+  notesBtn.addEventListener('click', function(){
+    var off = notes.classList.toggle('off');
+    notesBtn.setAttribute('aria-pressed', off ? 'false' : 'true');
+  });
+  document.getElementById('themeBtn').addEventListener('click', function(){
+    var r = document.documentElement;
+    var now = r.getAttribute('data-theme');
+    if(!now){
+      now = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    r.setAttribute('data-theme', now === 'dark' ? 'light' : 'dark');
+  });
+  document.getElementById('resetBtn').addEventListener('click', function(){
+    session = null; loads = []; current = null; sigs = {}; switching = false;
+    try{ localStorage.removeItem(STORE); }catch(e){}
+    renderLoads();
+    fCompany.value = ''; fDriver.value = ''; fReg.value = ''; fPhone.value = '';
+    validate();
+    markRemembered();
+    go('signin');
+  });
+
+  /* live-ish clock, stopped at a plausible site time */
+  document.getElementById('clock').textContent = '15:24';
+})();
+</script>
+</body>
+</html>
