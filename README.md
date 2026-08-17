@@ -15,11 +15,8 @@ run on Railway.
 ## What it demonstrates
 
 - **Sign In** screen matching the live app, with **Haulier** added under Employee / Subcontractor.
-- **No-login entry**: haulage company (from Meaney's approved list), driver name, vehicle reg, optional mobile.
-  Nothing for the office to create per driver.
-- **Approved-company list, not free text** — every docket ties back to a real supplier account, so
-  self-billing still works and you don't accumulate three spellings of the same haulier.
-- **Request access** screen for a company that isn't on the list — the single approval gate on the flow.
+- **No-login entry**: haulage company, driver name and vehicle reg as plain text fields, plus optional mobile.
+  Nothing is set up in advance — not the driver, and not the haulage company.
 - **Day two is one tap**: a remembered lorry phone skips the entry screen and goes straight to Active Loads.
 - **Switch driver on this lorry**: company stays, name and reg clear — for two drivers sharing one phone.
 - **Agg Loads dashboard** matching the live app (Show Filters, Active Loads table, New Load / Back), with
@@ -28,8 +25,9 @@ run on Railway.
   **stamped read-only at the top**, cascading category → type, weight.
 - **Draw-to-sign** customer and driver signatures on canvas (clear & re-sign), plus docket image capture.
 - **My Shift**: dockets and tonnes today, who's signed in, switch driver, end shift & forget device.
-- **Notes panel** beside the phone explaining each decision, what dropping the login costs you, and the
-  open questions to confirm before build.
+- **Notes panel** beside the phone explaining each decision, what an open sign-in costs (no gate at all,
+  company names drifting, weaker signature), where the check has to move to instead, and the open questions
+  to confirm before build.
 
 ## Run locally
 

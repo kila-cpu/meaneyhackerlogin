@@ -20,8 +20,8 @@ don't get done in the app at all.
 
 ## 2. The proposed solution in one line
 
-Add a third sign-in type — **Haulier** — that takes no credentials: the driver picks their haulage company
-from Meaney's approved list, types their name and vehicle reg, and lands straight on Agg Loads to do dockets.
+Add a third sign-in type — **Haulier** — that takes no credentials: the driver types their haulage company,
+their name and their vehicle reg, and lands straight on Agg Loads to do dockets.
 
 ---
 
@@ -33,24 +33,19 @@ from Meaney's approved list, types their name and vehicle reg, and lands straigh
 | Subcontractor (existing) | Subcontract crews | Password |
 | **Haulier (new)** | Subcontracted haulage drivers | **None** |
 
-The **company** is approved once by Meaney. Individual drivers are never set up.
+Nothing is set up in advance — not the driver, and not the haulage company.
 
 ## 4. What the driver does
 
 1. Taps **Haulier** on the Sign In screen.
-2. Picks their **haulage company** from a dropdown of hauliers Meaney has approved.
-3. Types **driver name** and **vehicle reg**. Mobile optional.
-4. Taps **Start doing dockets** — straight onto Active Loads.
+2. Types **haulage company**, **driver name** and **vehicle reg**. Mobile optional.
+3. Taps **Start doing dockets** — straight onto Active Loads.
 
-The device remembers them. From the next day, tapping **Haulier** goes straight to Active Loads and the entry
-screen never appears again.
+All three are plain text fields. The device remembers them, so from the next day tapping **Haulier** goes
+straight to Active Loads and the entry screen never appears again.
 
-**Company is a dropdown, not free text.** This is the one field that must be constrained: free text gives you
-"Byrnes", "Byrne Haulage" and "byrne haulage ltd" as three different suppliers inside a week, and then
-dockets can't be matched to a supplier account for self-billing.
-
-**Company not on the list** → a short request-access screen (company, contact, mobile, number of lorries)
-that goes to the Meaney office. Approving the company is the only gate in the whole flow.
+This is the lightest possible sign-in: a lorry that turns up for the first time this morning can be doing
+dockets inside a minute, with no office involvement at all. Section 8 covers what that costs.
 
 ## 5. What a haulier sees
 
@@ -83,33 +78,40 @@ theirs. Today's dockets stay attributed to whoever raised them.
 
 These are the real trade-offs, not reasons to abandon the idea.
 
-1. **Nobody is verified.** Anyone who can install the app and knows an approved haulier's name can submit
-   dockets as that haulier. The approved-company list is the only thing standing in the way.
-2. **The signature is weaker.** It's a drawn mark plus a self-typed name, not tied to an account. Fine for a
+1. **There is no gate at all.** Anyone who can install the app can type any company and any name and submit
+   dockets. Nothing is verified at sign-in, so every check has to happen in the office afterwards.
+2. **Company names will drift.** You will get "Byrnes", "Byrne Haulage" and "byrne haulage ltd" as three
+   names for one supplier. Someone has to map typed names onto real supplier accounts before self-billing
+   can run — this is the main new office workload the change creates.
+3. **The signature is weaker.** It's a drawn mark plus a self-typed name, not tied to an account. Fine for a
    delivery docket. It would **not** satisfy the account-tied signature requirement on the dayworks sheets.
-3. **Drivers aren't deduplicated.** "J Kavanagh" and "John Kavanagh" are two different people to the system.
+4. **Drivers aren't deduplicated.** "J Kavanagh" and "John Kavanagh" are two different people to the system.
    The **reg** is the reliable key, not the name.
-4. **Any approved haulier can submit against any customer** unless the customer list is restricted per
-   haulier, or the office reviews dockets before they're billable.
-5. **Driver names and mobiles are still personal data** even with no account, so they need a retention rule.
+5. **Anyone can submit against any customer** unless the customer list is restricted per haulier, or the
+   office reviews dockets before they're billable.
+6. **Driver names and mobiles are still personal data** even with no account, so they need a retention rule.
 
-### The cheap safeguard, if 1 is too loose
+### Where the check has to move to
 
-A **4-digit job code** the site foreman reads out — one per site per week, typed once on the entry screen.
-Keeps the no-login promise, but stops a stranger submitting dockets. Worth pricing as an option rather than
-building it by default.
+Because nothing is stopped at the point of entry, the office needs a way to deal with it after the fact. Two
+options worth pricing — neither is assumed in the prototype:
+
+- **A review queue.** Haulier dockets land as unconfirmed until someone attaches them to a supplier account.
+  Adds an office step, keeps the billing clean, and handles both problems 1 and 2 at once.
+- **A 4-digit job code** the site foreman reads out — one per site per week, typed once on the entry screen.
+  Still no accounts, but a stranger can't submit dockets. Addresses problem 1 only.
 
 ---
 
 ## 9. Open questions to confirm before build
 
-1. Who maintains the approved haulier list — a new office admin screen, or the existing supplier list in the
-   back office?
+1. How does a typed company name get matched to a supplier account for self-billing — office review, or fuzzy
+   matching against the back office supplier list?
 2. Does a haulier docket land straight in with employee dockets, or into a review queue the office approves
    first?
 3. Should the customer list be restricted to the sites that haulier is actually working on?
 4. Can a driver open and edit a docket after submitting, or is it locked?
-5. Is the 4-digit job code in scope, or is the approved-company list enough?
+5. Is the 4-digit job code in scope, or is an open sign-in acceptable?
 6. Does the office need a live "which regs are on site now" view, or only completed dockets?
 7. Is a customer signature mandatory on a haulier docket, or is the photo of the weighbridge docket enough?
 8. How long are driver name and mobile kept after the job ends?

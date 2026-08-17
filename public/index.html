@@ -421,11 +421,9 @@
                 and you can start doing dockets.</p>
 
               <div class="flabel">Haulage company <span class="req">*</span></div>
-              <select class="control" id="fCompany">
-                <option value="">Select your company</option>
-              </select>
-              <p class="hint">Chosen from the hauliers Meaney has approved &mdash; not free text, so dockets always
-                match a real supplier account.</p>
+              <input class="control" id="fCompany" placeholder="e.g. Byrne Haulage Ltd"
+                     autocomplete="organization" maxlength="60">
+              <p class="hint">Type your haulage company as it should appear on the docket.</p>
 
               <div class="flabel">Driver name <span class="req">*</span></div>
               <input class="control" id="fDriver" placeholder="e.g. John Kavanagh" autocomplete="name">
@@ -450,46 +448,10 @@
           </div>
           <div class="formfoot">
             <button class="cta" id="startBtn" disabled>Start doing dockets</button>
-            <button class="cta sub" data-go="request">My company isn&rsquo;t on the list</button>
           </div>
         </section>
 
-        <!-- ---------- 3. REQUEST ACCESS ---------- -->
-        <section class="view" data-view="request">
-          <div class="topbar">
-            <button class="rbtn" data-nav="entry" aria-label="Back">%ARROW%</button>
-            <div class="ttl">Request access</div>
-            <span></span>
-          </div>
-          <div class="scroll">
-            <div class="body">
-              <p class="lede">Send your details to the Meaney office. Once they add your company you&rsquo;ll
-                find it in the list &mdash; still no password to remember.</p>
-
-              <div class="flabel">Company name <span class="req">*</span></div>
-              <input class="control" placeholder="Haulage company name">
-              <div class="flabel">Contact name <span class="req">*</span></div>
-              <input class="control" placeholder="Who Meaney should ring">
-              <div class="flabel">Mobile <span class="req">*</span></div>
-              <input class="control" placeholder="087 000 0000" inputmode="tel">
-              <div class="flabel">Number of lorries</div>
-              <select class="control">
-                <option>1&ndash;2</option><option>3&ndash;5</option><option>6&ndash;10</option><option>10+</option>
-              </select>
-
-              <div class="notice">
-                %WARN%
-                <span>This is the only gate on the whole flow. Approving the company once is what stops
-                  anyone with the app claiming to be a Meaney haulier.</span>
-              </div>
-            </div>
-          </div>
-          <div class="formfoot">
-            <button class="cta" data-toast="Request sent to the Meaney office" data-nav="entry">Send request</button>
-          </div>
-        </section>
-
-        <!-- ---------- 4. DASHBOARD ---------- -->
+        <!-- ---------- 3. DASHBOARD ---------- -->
         <section class="view" data-view="dash">
           <div class="apphead">
             <button class="circ" data-nav="dash" aria-label="Home">%HOME%</button>
@@ -549,7 +511,7 @@
           </nav>
         </section>
 
-        <!-- ---------- 5. PICKER ---------- -->
+        <!-- ---------- 4. PICKER ---------- -->
         <section class="view" data-view="picker">
           <div class="topbar">
             <button class="rbtn" data-nav="dash" aria-label="Back">%ARROW%</button>
@@ -569,7 +531,7 @@
           </div>
         </section>
 
-        <!-- ---------- 6. DOCKET FORM 1 ---------- -->
+        <!-- ---------- 5. DOCKET FORM 1 ---------- -->
         <section class="view" data-view="form1">
           <div class="topbar">
             <button class="rbtn" data-nav="picker" aria-label="Back">%ARROW%</button>
@@ -616,7 +578,7 @@
           <div class="formfoot"><button class="cta" data-go="form2">Next</button></div>
         </section>
 
-        <!-- ---------- 7. DOCKET FORM 2 ---------- -->
+        <!-- ---------- 6. DOCKET FORM 2 ---------- -->
         <section class="view" data-view="form2">
           <div class="topbar">
             <button class="rbtn" data-nav="form1" aria-label="Back">%ARROW%</button>
@@ -661,7 +623,7 @@
           <div class="formfoot"><button class="cta" id="submitBtn">Submit docket</button></div>
         </section>
 
-        <!-- ---------- 8. SUCCESS ---------- -->
+        <!-- ---------- 7. SUCCESS ---------- -->
         <section class="view" data-view="success">
           <div class="success">
             <div class="tick">%BIGCHECK%</div>
@@ -674,7 +636,7 @@
           </div>
         </section>
 
-        <!-- ---------- 9. SHIFT ---------- -->
+        <!-- ---------- 8. SHIFT ---------- -->
         <section class="view" data-view="shift">
           <div class="topbar">
             <button class="rbtn" data-nav="dash" aria-label="Back">%ARROW%</button>
@@ -753,12 +715,12 @@
     </div>
 
     <div class="ncard">
-      <h3><span class="n g">2</span>Company from a list, name and reg free</h3>
-      <p>The one field that isn&rsquo;t free text is the <b>company</b>. It comes from the hauliers Meaney has
-        approved, so every docket ties back to a real supplier account and self-billing still works. Driver
-        name and reg are typed &mdash; and the reg is what actually identifies the load on site.</p>
-      <p>Free-text company names would give you &ldquo;Byrnes&rdquo;, &ldquo;Byrne Haulage&rdquo; and
-        &ldquo;byrne haulage ltd&rdquo; as three different suppliers inside a week.</p>
+      <h3><span class="n g">2</span>Company, name and reg &mdash; all typed</h3>
+      <p>Three free-text fields and nothing else. The driver types their haulage company, their name and the
+        reg, and that&rsquo;s the whole sign-in. Nothing has to exist in the system beforehand, so a lorry that
+        turns up for the first time this morning can be doing dockets in under a minute.</p>
+      <p>This is as light as the sign-in can get. The cost is that the office, not the app, has to sort out
+        which supplier a typed name belongs to &mdash; see the notes below.</p>
       <button class="step" data-go="entry">Show entry screen</button>
     </div>
 
@@ -787,10 +749,13 @@
     </div>
 
     <div class="ncard">
-      <h3><span class="n a">!</span>What you give up by dropping the login</h3>
+      <h3><span class="n a">!</span>What this costs, so nobody is surprised later</h3>
       <ul>
-        <li><b>Nobody is verified.</b> Anyone with the app can pick an approved company and type any name.
-          The approved-company list is the only gate.</li>
+        <li><b>There is no gate at all.</b> Anyone who installs the app can type any company and any name and
+          submit dockets. Nothing is checked at sign-in &mdash; the check has to happen in the office instead.</li>
+        <li><b>Company names will drift.</b> You will get &ldquo;Byrnes&rdquo;, &ldquo;Byrne Haulage&rdquo; and
+          &ldquo;byrne haulage ltd&rdquo; as three different names for one supplier. Someone has to map typed
+          names onto real supplier accounts before self-billing can run.</li>
         <li><b>The signature is weaker.</b> A drawn mark plus a self-typed name, not tied to an account.
           Fine for a delivery docket; it would not satisfy the dayworks signature requirement.</li>
         <li><b>Drivers aren&rsquo;t deduplicated.</b> &ldquo;J Kavanagh&rdquo; and &ldquo;John Kavanagh&rdquo;
@@ -803,22 +768,27 @@
     </div>
 
     <div class="ncard">
-      <h3><span class="n">?</span>Worth a cheap safeguard</h3>
-      <p>If &ldquo;anyone can claim to be a haulier&rdquo; is too loose, the smallest fix that keeps the
-        no-login promise is a <b>4-digit job code</b> the site foreman reads out. One code per site per week,
-        typed once on the entry screen. No accounts, but it stops a stranger submitting dockets.</p>
+      <h3><span class="n a">!</span>Where the check has to move to</h3>
+      <p>With free-text company names, nothing stops a bad or misspelled docket at the point of entry, so the
+        office needs a way to deal with it afterwards. The two cheapest options:</p>
+      <ul>
+        <li><b>A review queue.</b> Haulier dockets land as unconfirmed until someone in the office attaches
+          them to a supplier account. Adds an office step but keeps the billing clean.</li>
+        <li><b>A 4-digit job code</b> the site foreman reads out &mdash; one per site per week, typed once on
+          the entry screen. Still no accounts, but a stranger can&rsquo;t submit dockets.</li>
+      </ul>
+      <p>Both are options to price, not assumptions in this prototype.</p>
     </div>
 
     <div class="ncard">
       <h3><span class="n">?</span>Open questions before build</h3>
       <ol class="q">
-        <li>Who maintains the approved haulier list &mdash; office admin screen, or is it the existing
-          supplier list in the back office?</li>
+        <li>How does a typed company name get matched to a supplier account for self-billing &mdash; office
+          review, or fuzzy matching on the back office list?</li>
         <li>Does a haulier docket land straight in with employee dockets, or into a review queue the office
           approves first?</li>
         <li>Should the customer list be restricted to the sites that haulier is actually working on?</li>
         <li>Can a driver open and edit a docket after submitting, or is it locked?</li>
-        <li>Two drivers sharing one lorry phone &mdash; does &ldquo;remember me&rdquo; need a quick switch?</li>
         <li>Does the office need to see &ldquo;which reg is on site right now&rdquo;, or only completed dockets?</li>
         <li>Is a customer signature mandatory on a haulier docket, or photo-of-docket enough?</li>
         <li>How long are driver name and mobile kept after the job ends?</li>
@@ -858,10 +828,7 @@
     document.getElementById('views').innerHTML.replace(/%([A-Z0-9]+)%/g, function(m,k){ return I[k] || m; });
 
   /* ---------------- reference data ---------------- */
-  var COMPANIES = [
-    'Byrne Haulage Ltd','Kavanagh Transport','Tobin Bulk Haulage',
-    "O'Reilly Plant & Haulage",'Walsh Tipper Hire','Nolan Aggregates Transport'
-  ];
+  /* Haulage company is free text — nothing to look it up against. */
   var CUSTOMERS = ['Collen Construction','John Sisk & Son','Lagan Construction','Westar Ltd','Meaney &mdash; internal'];
   var ADDRESSES = ['Ballymount Yard, D12','Naas Road Depot','Kildare Quarry','Clondalkin Site 4','Newbridge Compound'];
   var CATS = {
@@ -885,7 +852,6 @@
     el.innerHTML = '<option value="">'+placeholder+'</option>' +
       list.map(function(v){ return '<option>'+v+'</option>'; }).join('');
   }
-  fill('#fCompany', COMPANIES, 'Select your company');
   fill('#fCustomer', CUSTOMERS, 'Select Customer');
   fill('#fFrom', ADDRESSES, 'Select address');
   fill('#fTo', ADDRESSES, 'Select address');
@@ -950,7 +916,8 @@
   var remember = document.getElementById('fRemember');
 
   function validate(){
-    var ok = fCompany.value && fDriver.value.trim().length > 2 && fReg.value.trim().length > 3;
+    var ok = fCompany.value.trim().length > 2 && fDriver.value.trim().length > 2 &&
+             fReg.value.trim().length > 3;
     startBtn.disabled = !ok;
   }
   [fCompany, fDriver, fReg].forEach(function(el){
@@ -968,7 +935,7 @@
   startBtn.addEventListener('click', function(){
     switching = false;
     session = {
-      company: fCompany.value,
+      company: fCompany.value.trim(),
       driver:  fDriver.value.trim(),
       reg:     fReg.value.trim(),
       phone:   fPhone.value.trim(),
