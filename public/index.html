@@ -106,10 +106,6 @@
   .role.fill{background:var(--red);color:#fff;box-shadow:0 10px 22px -12px rgba(225,25,34,.9)}
   .role.ghost{background:#fff;color:var(--red)}
   .role:active{transform:translateY(1px)}
-  .role.new{position:relative}
-  .role.new .tag{position:absolute;top:-9px;right:12px;background:var(--green);color:#fff;font-size:9.5px;
-    font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px}
-  .role .cap{display:block;font-size:11.5px;font-weight:600;color:var(--sub);margin-top:4px;letter-spacing:0}
 
   /* ---------- app header ---------- */
   .apphead{flex:none;display:grid;grid-template-columns:56px 1fr 56px;align-items:center;
@@ -366,11 +362,7 @@
             <div class="roles">
               <button class="role fill" data-role="Employee">Employee</button>
               <button class="role ghost" data-role="Subcontractor">Subcontractor</button>
-              <button class="role ghost new" data-go="entry" id="haulierBtn">
-                <span class="tag">New</span>
-                Haulier
-                <span class="cap" id="haulierCap">No login needed &mdash; company &amp; name only</span>
-              </button>
+              <button class="role ghost" data-go="entry" id="haulierBtn">Haulier</button>
             </div>
           </div>
         </section>
@@ -801,7 +793,6 @@
     };
     if(session.remember) save(); else { try{ localStorage.removeItem(STORE); }catch(e){} }
     paintSession();
-    markRemembered();
     go('dash');
     toast('Signed in as ' + session.driver + ' &mdash; no account needed');
   });
@@ -823,16 +814,6 @@
     setAll('data-stamp-reg', session.reg);
     setAll('data-initials', initials(session.driver));
   }
-
-  /* a remembered device skips the entry screen entirely */
-  function markRemembered(){
-    var cap = document.getElementById('haulierCap');
-    if(session){
-      cap.innerHTML = 'Remembered &mdash; ' + session.driver + ', ' + session.reg;
-    }else{
-      cap.innerHTML = 'No login needed &mdash; company &amp; name only';
-    }
-  }
   if(session){
     fCompany.value = session.company;
     fDriver.value  = session.driver;
@@ -841,7 +822,6 @@
     validate();
     paintSession();
   }
-  markRemembered();
 
   /* ---------------- loads list ---------------- */
   function today(){
@@ -1086,7 +1066,6 @@
     renderLoads();
     fCompany.value = ''; fDriver.value = ''; fReg.value = ''; fPhone.value = '';
     validate();
-    markRemembered();
     go('signin');
     toast('Shift ended and device forgotten');
   });
@@ -1105,7 +1084,6 @@
     renderLoads();
     fCompany.value = ''; fDriver.value = ''; fReg.value = ''; fPhone.value = '';
     validate();
-    markRemembered();
     go('signin');
   });
 
