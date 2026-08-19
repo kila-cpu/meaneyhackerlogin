@@ -49,8 +49,6 @@
   .masthead .eyebrow{font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--red);font-weight:800;margin:0 0 10px}
   .masthead h1{margin:0;font-size:clamp(28px,5.6vw,44px);font-weight:800;letter-spacing:-.025em;line-height:1}
   .masthead p{margin:14px auto 0;max-width:52ch;color:var(--page-sub);font-size:15px;line-height:1.55}
-  .quote{margin:16px auto 0;max-width:56ch;font-size:14px;line-height:1.55;color:var(--page-sub);
-    border-left:3px solid var(--red);padding:2px 0 2px 14px;text-align:left;font-style:italic}
 
   .toolbar{display:flex;gap:9px;flex-wrap:wrap;justify-content:center}
   .tbtn{border:1px solid var(--panel-line);background:var(--panel);color:var(--page-ink);
@@ -271,12 +269,6 @@
   .captile svg{width:22px;height:22px;color:var(--red)}
   .thumb{display:none;width:100%;margin-top:14px;border-radius:10px;border:1px solid var(--line)}
 
-  /* ---------- notice ---------- */
-  .notice{display:flex;gap:10px;align-items:flex-start;background:var(--amber-soft);border:1px solid #F0DBB4;
-    border-radius:12px;padding:12px 13px;font-size:12.5px;line-height:1.5;color:#6E4405;margin-top:16px}
-  .notice svg{flex:none;width:16px;height:16px;margin-top:1px}
-  .notice.info{background:#EAF1FE;border-color:#C8DAFA;color:#1B3E7E}
-
   /* ---------- success ---------- */
   .success{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
     gap:0;padding:30px 28px;text-align:center}
@@ -332,28 +324,6 @@
     background:rgba(20,24,32,.94);color:#fff;font-size:13px;font-weight:600;padding:11px 16px;border-radius:10px;
     max-width:80%;text-align:center;opacity:0;pointer-events:none;transition:.24s}
   .toast.on{opacity:1;transform:translate(-50%,0)}
-
-  /* ---------- notes panel ---------- */
-  .notes{width:430px;max-width:100%;display:flex;flex-direction:column;gap:14px}
-  .notes.off{display:none}
-  .ncard{background:var(--panel);border:1px solid var(--panel-line);border-radius:16px;padding:18px 20px;
-    backdrop-filter:blur(8px)}
-  .ncard h3{margin:0 0 4px;font-size:15px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;gap:9px}
-  .ncard h3 .n{flex:none;width:22px;height:22px;border-radius:7px;background:var(--red);color:#fff;
-    display:grid;place-items:center;font-size:11.5px;font-weight:800}
-  .ncard h3 .n.g{background:var(--green)}
-  .ncard h3 .n.a{background:#B4690E}
-  .ncard p{margin:10px 0 0;font-size:13.5px;line-height:1.6;color:var(--page-sub)}
-  .ncard ul{margin:10px 0 0;padding-left:20px;font-size:13.5px;line-height:1.65;color:var(--page-sub)}
-  .ncard li+li{margin-top:6px}
-  .ncard li b,.ncard p b{color:var(--page-ink);font-weight:700}
-  .ncard .step{background:none;border:1px solid var(--panel-line);color:var(--page-ink);font-size:12px;
-    font-weight:700;padding:6px 11px;border-radius:8px;cursor:pointer;margin-top:12px}
-  .ncard code{font-family:var(--mono);font-size:12px;background:var(--panel-line);padding:1px 5px;border-radius:4px}
-  .q{counter-reset:q}
-  .q li{list-style:none;position:relative;padding-left:26px;counter-increment:q}
-  .q li::before{content:counter(q);position:absolute;left:0;top:1px;width:18px;height:18px;border-radius:5px;
-    background:var(--panel-line);color:var(--page-ink);font-size:10.5px;font-weight:800;display:grid;place-items:center}
 </style>
 </head>
 <body>
@@ -364,12 +334,9 @@
   <p>A third sign-in type beside Employee and Subcontractor. A haulage driver picks their company,
      types their name and reg, and lands straight on Agg Loads to do dockets &mdash; no account, no password,
      nothing for the office to set up per driver.</p>
-  <p class="quote">&ldquo;Is there a way that each driver doesn&rsquo;t have to have a profile and basically they
-     add their company and name and away they go to be able to do dockets?&rdquo;</p>
 </header>
 
 <div class="toolbar">
-  <button class="tbtn" id="notesBtn" aria-pressed="true">Notes panel</button>
   <button class="tbtn" id="themeBtn">Dark / light</button>
   <button class="tbtn" id="resetBtn">Reset demo</button>
 </div>
@@ -438,12 +405,6 @@
                 <span class="box">%CHECK%</span>
                 <span>Remember me on this lorry&rsquo;s phone &mdash; skip this screen tomorrow</span>
               </label>
-
-              <div class="notice info">
-                %INFO%
-                <span>Every docket is stamped with this company, name and reg automatically. The driver never
-                  types them again.</span>
-              </div>
             </div>
           </div>
           <div class="formfoot">
@@ -601,13 +562,6 @@
                 <img alt="" data-sig-img="driver">
               </button>
 
-              <div class="notice">
-                %WARN%
-                <span>With no account behind the driver, the signature is a drawn mark plus the name typed at
-                  sign-in. Good enough for a delivery docket &mdash; weaker than the account-tied signature the
-                  dayworks sheets need.</span>
-              </div>
-
               <div class="sec-head">Docket image</div>
               <div class="dropzone">
                 <p class="dz-hint">Take a photo of the weighbridge or quarry docket</p>
@@ -702,100 +656,6 @@
       <div class="homebar"><i></i></div>
     </div>
   </div>
-
-  <!-- ================= NOTES ================= -->
-  <aside class="notes" id="notes">
-
-    <div class="ncard">
-      <h3><span class="n g">1</span>A third button, not a third account system</h3>
-      <p>Employee and Subcontractor keep their password logins. <b>Haulier</b> sits under them with no
-        credentials at all &mdash; because the office is never going to create and reset accounts for
-        every agency driver who turns up in a lorry.</p>
-      <button class="step" data-go="signin">Show sign-in screen</button>
-    </div>
-
-    <div class="ncard">
-      <h3><span class="n g">2</span>Company, name and reg &mdash; all typed</h3>
-      <p>Three free-text fields and nothing else. The driver types their haulage company, their name and the
-        reg, and that&rsquo;s the whole sign-in. Nothing has to exist in the system beforehand, so a lorry that
-        turns up for the first time this morning can be doing dockets in under a minute.</p>
-      <p>This is as light as the sign-in can get. The cost is that the office, not the app, has to sort out
-        which supplier a typed name belongs to &mdash; see the notes below.</p>
-      <button class="step" data-go="entry">Show entry screen</button>
-    </div>
-
-    <div class="ncard">
-      <h3><span class="n g">3</span>Typed once, stamped on every docket</h3>
-      <p>Company, driver and reg are remembered on the device and printed read-only at the top of each
-        docket. The driver never retypes them, and the office always knows who submitted what.</p>
-      <button class="step" data-go="form1">Show docket form</button>
-    </div>
-
-    <div class="ncard">
-      <h3><span class="n g">4</span>Day two is one tap</h3>
-      <p>Once the lorry&rsquo;s phone remembers the driver, tapping <b>Haulier</b> goes straight to Active Loads
-        &mdash; the entry screen never appears again. Handing the phone to a second driver is a
-        <b>Switch driver</b> button on the Shift screen: company stays, name and reg clear.</p>
-      <p>Try it: sign in, then hit <code>Reset demo</code> or reload the page and tap Haulier again.</p>
-      <button class="step" data-go="shift">Show shift screen</button>
-    </div>
-
-    <div class="ncard">
-      <h3><span class="n g">5</span>Agg Loads and nothing else</h3>
-      <p>A haulier sign-in lands on Active Loads and can only reach the docket flow. Health &amp; Safety and
-        Projects stay visibly locked, and the module grid is closed &mdash; the same hard restriction the
-        contractor dayworks login uses.</p>
-      <button class="step" data-go="dash">Show dashboard</button>
-    </div>
-
-    <div class="ncard">
-      <h3><span class="n a">!</span>What this costs, so nobody is surprised later</h3>
-      <ul>
-        <li><b>There is no gate at all.</b> Anyone who installs the app can type any company and any name and
-          submit dockets. Nothing is checked at sign-in &mdash; the check has to happen in the office instead.</li>
-        <li><b>Company names will drift.</b> You will get &ldquo;Byrnes&rdquo;, &ldquo;Byrne Haulage&rdquo; and
-          &ldquo;byrne haulage ltd&rdquo; as three different names for one supplier. Someone has to map typed
-          names onto real supplier accounts before self-billing can run.</li>
-        <li><b>The signature is weaker.</b> A drawn mark plus a self-typed name, not tied to an account.
-          Fine for a delivery docket; it would not satisfy the dayworks signature requirement.</li>
-        <li><b>Drivers aren&rsquo;t deduplicated.</b> &ldquo;J Kavanagh&rdquo; and &ldquo;John Kavanagh&rdquo;
-          are two people to the system. Reg is the reliable key, not the name.</li>
-        <li><b>Anyone can submit against any customer.</b> Worth restricting the customer list per haulier,
-          or letting the office reject a docket before it&rsquo;s billable.</li>
-        <li><b>Driver names and mobiles are still personal data</b> even with no account &mdash; they need a
-          retention rule.</li>
-      </ul>
-    </div>
-
-    <div class="ncard">
-      <h3><span class="n a">!</span>Where the check has to move to</h3>
-      <p>With free-text company names, nothing stops a bad or misspelled docket at the point of entry, so the
-        office needs a way to deal with it afterwards. The two cheapest options:</p>
-      <ul>
-        <li><b>A review queue.</b> Haulier dockets land as unconfirmed until someone in the office attaches
-          them to a supplier account. Adds an office step but keeps the billing clean.</li>
-        <li><b>A 4-digit job code</b> the site foreman reads out &mdash; one per site per week, typed once on
-          the entry screen. Still no accounts, but a stranger can&rsquo;t submit dockets.</li>
-      </ul>
-      <p>Both are options to price, not assumptions in this prototype.</p>
-    </div>
-
-    <div class="ncard">
-      <h3><span class="n">?</span>Open questions before build</h3>
-      <ol class="q">
-        <li>How does a typed company name get matched to a supplier account for self-billing &mdash; office
-          review, or fuzzy matching on the back office list?</li>
-        <li>Does a haulier docket land straight in with employee dockets, or into a review queue the office
-          approves first?</li>
-        <li>Should the customer list be restricted to the sites that haulier is actually working on?</li>
-        <li>Can a driver open and edit a docket after submitting, or is it locked?</li>
-        <li>Does the office need to see &ldquo;which reg is on site right now&rdquo;, or only completed dockets?</li>
-        <li>Is a customer signature mandatory on a haulier docket, or photo-of-docket enough?</li>
-        <li>How long are driver name and mobile kept after the job ends?</li>
-      </ol>
-    </div>
-
-  </aside>
 </div>
 
 <script>
@@ -820,9 +680,7 @@
     PEN:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.9l3.6 3.6L8.4 19.2l-4.6 1 1-4.6z"/><path d="M3.2 21.6h17.6"/></svg>',
     CAM:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.6h3.2l1.4-2.2h8.8l1.4 2.2H21v10H3z"/><circle cx="12" cy="13.4" r="3.2"/></svg>',
     GALLERY:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.6" width="18" height="14.8" rx="2.2"/><circle cx="8.6" cy="9.8" r="1.6"/><path d="M4 17l5-5 4 4 3-2.4 4 3.4"/></svg>',
-    SCAN:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.4V6a2 2 0 012-2h2.4M15.6 4H18a2 2 0 012 2v2.4M20 15.6V18a2 2 0 01-2 2h-2.4M8.4 20H6a2 2 0 01-2-2v-2.4M3.4 12h17.2"/></svg>',
-    INFO:   '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8a9.2 9.2 0 100 18.4 9.2 9.2 0 000-18.4zm0 4a1.3 1.3 0 110 2.6 1.3 1.3 0 010-2.6zm1.2 10.8h-2.4v-6.4h2.4z"/></svg>',
-    WARN:   '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8 1.6 21.2h20.8L12 2.8zm-1.2 6h2.4v6.4h-2.4zm0 8h2.4v2.4h-2.4z"/></svg>'
+    SCAN:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.4V6a2 2 0 012-2h2.4M15.6 4H18a2 2 0 012 2v2.4M20 15.6V18a2 2 0 01-2 2h-2.4M8.4 20H6a2 2 0 01-2-2v-2.4M3.4 12h17.2"/></svg>'
   };
   document.getElementById('views').innerHTML =
     document.getElementById('views').innerHTML.replace(/%([A-Z0-9]+)%/g, function(m,k){ return I[k] || m; });
@@ -1233,13 +1091,7 @@
     toast('Shift ended and device forgotten');
   });
 
-  /* ---------------- page chrome ---------------- */
-  var notesBtn = document.getElementById('notesBtn'), notes = document.getElementById('notes');
-  notesBtn.addEventListener('click', function(){
-    var off = notes.classList.toggle('off');
-    notesBtn.setAttribute('aria-pressed', off ? 'false' : 'true');
-  });
-  document.getElementById('themeBtn').addEventListener('click', function(){
+  /* ---------------- page chrome ---------------- */  document.getElementById('themeBtn').addEventListener('click', function(){
     var r = document.documentElement;
     var now = r.getAttribute('data-theme');
     if(!now){

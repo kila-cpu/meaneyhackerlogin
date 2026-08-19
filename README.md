@@ -25,9 +25,9 @@ run on Railway.
   **stamped read-only at the top**, cascading category → type, weight.
 - **Draw-to-sign** customer and driver signatures on canvas (clear & re-sign), plus docket image capture.
 - **My Shift**: dockets and tonnes today, who's signed in, switch driver, end shift & forget device.
-- **Notes panel** beside the phone explaining each decision, what an open sign-in costs (no gate at all,
-  company names drifting, weaker signature), where the check has to move to instead, and the open questions
-  to confirm before build.
+
+The prototype carries no annotations or commentary — every screen is the app as a driver would see it. The
+rationale, trade-offs and open questions live in `Proposed_App_Changes_Haulier_Access.md` instead.
 
 ## Run locally
 
