@@ -131,7 +131,6 @@
 
   /* ---------- forms ---------- */
   .body{padding:16px 16px 22px;display:flex;flex-direction:column;gap:0}
-  .lede{margin:0 0 16px;font-size:14px;line-height:1.55;color:var(--sub)}
   .flabel{font-size:12.5px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;
     margin:14px 0 6px;display:flex;align-items:center;gap:7px}
   .flabel .req{color:var(--red);font-size:14px;line-height:1}
@@ -143,13 +142,6 @@
   textarea.control{min-height:84px;resize:none}
   input.reg{font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
   .hint{margin:6px 0 0;font-size:12px;line-height:1.45;color:var(--faint)}
-  .check{display:flex;align-items:flex-start;gap:11px;margin-top:18px;cursor:pointer;font-size:13.5px;
-    line-height:1.45;color:var(--ink)}
-  .check .box{flex:none;width:22px;height:22px;border-radius:6px;border:2px solid var(--field-line);
-    background:#fff;display:grid;place-items:center;color:#fff;transition:.12s}
-  .check .box svg{width:14px;height:14px;opacity:0}
-  .check.on .box{background:var(--red);border-color:var(--red)}
-  .check.on .box svg{opacity:1}
 
   .formfoot{flex:none;padding:14px 16px 18px;background:#fff;border-top:1px solid var(--line)}
   .cta{width:100%;border:0;background:var(--red);color:#fff;font-size:16.5px;font-weight:800;padding:16px;
@@ -376,9 +368,6 @@
           </div>
           <div class="scroll">
             <div class="body">
-              <p class="lede">No account and no password. Tell us who you are and which lorry you&rsquo;re in,
-                and you can start doing dockets.</p>
-
               <div class="flabel">Haulage company <span class="req">*</span></div>
               <input class="control" id="fCompany" placeholder="e.g. Byrne Haulage Ltd"
                      autocomplete="organization" maxlength="60">
@@ -393,10 +382,6 @@
               <div class="flabel">Mobile <span style="font-weight:600;text-transform:none;letter-spacing:0">(optional)</span></div>
               <input class="control" id="fPhone" placeholder="087 000 0000" inputmode="tel">
 
-              <label class="check on" id="fRemember">
-                <span class="box">%CHECK%</span>
-                <span>Remember me on this lorry&rsquo;s phone &mdash; skip this screen tomorrow</span>
-              </label>
             </div>
           </div>
           <div class="formfoot">
@@ -661,7 +646,6 @@
     HOMEF:  '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.2 2.6 11h2.6v9.2h5V14h3.6v6.2h5V11h2.6L12 3.2z"/></svg>',
     PLUS:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
     FILTER: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 6h18M6 12h12M10 18h4"/></svg>',
-    CHECK:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
     BIGCHECK:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M8 12.4l2.8 2.8L16.4 9.6"/></svg>',
     TRUCK:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h11v9H2zM13 10h4.4l3.6 3.6V16h-8z"/><circle cx="6.4" cy="18.4" r="1.9"/><circle cx="17" cy="18.4" r="1.9"/></svg>',
     TRUCK2: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h11v9H2zM13 10h4.4l3.6 3.6V16h-8z"/><circle cx="6.4" cy="18.4" r="1.9"/><circle cx="17" cy="18.4" r="1.9"/></svg>',
@@ -763,7 +747,6 @@
   var fReg     = document.getElementById('fReg');
   var fPhone   = document.getElementById('fPhone');
   var startBtn = document.getElementById('startBtn');
-  var remember = document.getElementById('fRemember');
 
   function validate(){
     var ok = fCompany.value.trim().length > 2 && fDriver.value.trim().length > 2 &&
@@ -777,21 +760,15 @@
   fReg.addEventListener('input', function(){
     this.value = this.value.toUpperCase().replace(/[^A-Z0-9-]/g,'');
   });
-  remember.addEventListener('click', function(e){
-    e.preventDefault();
-    this.classList.toggle('on');
-  });
-
   startBtn.addEventListener('click', function(){
     switching = false;
     session = {
       company: fCompany.value.trim(),
       driver:  fDriver.value.trim(),
       reg:     fReg.value.trim(),
-      phone:   fPhone.value.trim(),
-      remember: remember.classList.contains('on')
+      phone:   fPhone.value.trim()
     };
-    if(session.remember) save(); else { try{ localStorage.removeItem(STORE); }catch(e){} }
+    save();
     paintSession();
     go('dash');
     toast('Signed in as ' + session.driver + ' &mdash; no account needed');
@@ -1029,7 +1006,7 @@
     if(!dest) return;
 
     /* day two: the device already knows the driver, so skip the entry screen */
-    if(dest === 'entry' && session && session.remember && !switching){
+    if(dest === 'entry' && session && !switching){
       go('dash');
       toast('Welcome back &mdash; ' + session.driver + ', ' + session.reg);
       return;
